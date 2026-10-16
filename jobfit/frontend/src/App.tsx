@@ -1,15 +1,20 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Sidebar } from './components/Sidebar';
 import type { NavTab } from './components/Sidebar';
-import { AIStatusBanner } from './components/AIStatusBanner';
+import { Header } from './components/Header';
 import { DashboardOverview } from './features/dashboard/DashboardOverview';
-import { PlaceholderView } from './components/PlaceholderView';
+import { AnalyzeJobView } from './features/analysis/AnalyzeJobView';
+import { ResumeView } from './features/resume/ResumeView';
+import { ApplicationsView } from './features/applications/ApplicationsView';
+import { SavedAnalysesView } from './features/analysis/SavedAnalysesView';
+import { SettingsView } from './features/settings/SettingsView';
 import { getAIHealth } from './lib/api';
 import type { AIHealth } from './lib/types';
-import { Sparkles, FileText, Briefcase, History, Settings } from 'lucide-react';
+import { Menu } from 'lucide-react';
 
 export function App() {
   const [activeTab, setActiveTab] = useState<NavTab>('overview');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [aiHealth, setAiHealth] = useState<AIHealth | null>(null);
   const [loadingAi, setLoadingAi] = useState<boolean>(true);
 
@@ -43,17 +48,17 @@ export function App() {
       case 'overview':
         return {
           title: 'Career Dashboard',
-          subtitle: 'Welcome to JobFit. Your local-first AI career copilot.',
+          subtitle: 'Welcome to JobFit. Your private, local-first AI career copilot.',
         };
       case 'analyze':
         return {
-          title: 'Analyze Job Opening',
+          title: 'Analyze Job Match',
           subtitle: 'Match requirements against your resume with evidence-backed citations.',
         };
       case 'resume':
         return {
-          title: 'My Resume & Skills Profile',
-          subtitle: 'Manage local career documents and structured skill extractions.',
+          title: 'My Resume & Skills',
+          subtitle: 'Manage local career documents and structured competencies.',
         };
       case 'applications':
         return {
@@ -77,24 +82,36 @@ export function App() {
 
   return (
     <div className="app-container">
-      {/* Dark Charcoal Navigation Sidebar */}
-      <Sidebar activeTab={activeTab} onSelectTab={setActiveTab} />
+      {/* Mobile Topbar */}
+      <div className="mobile-topbar">
+        <strong style={{ fontSize: '1.1rem' }}>JobFit</strong>
+        <button
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          style={{ background: 'none', border: 'none', color: '#FFFFFF', cursor: 'pointer' }}
+          aria-label="Toggle Navigation"
+        >
+          <Menu style={{ width: '22px', height: '22px' }} />
+        </button>
+      </div>
+
+      {/* Dark Charcoal Navigation Sidebar (#24222D) with Soft-Lime Active Indicator */}
+      <Sidebar
+        activeTab={activeTab}
+        onSelectTab={setActiveTab}
+        isOpen={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+      />
 
       {/* Main Content Area */}
       <main className="main-content">
-        {/* Top Header */}
-        <header className="top-bar">
-          <div className="page-title">
-            <h1>{header.title}</h1>
-            <p>{header.subtitle}</p>
-          </div>
-        </header>
-
-        {/* Dynamic AI Runtime Health Banner */}
-        <AIStatusBanner
-          health={aiHealth}
-          loading={loadingAi}
-          onRefresh={fetchHealth}
+        {/* Header with Title and Local AI Status */}
+        <Header
+          title={header.title}
+          subtitle={header.subtitle}
+          aiHealth={aiHealth}
+          loadingAi={loadingAi}
+          onRefreshAi={fetchHealth}
+          onOpenMobileMenu={() => setMobileMenuOpen(true)}
         />
 
         {/* Tab Routing */}
@@ -103,63 +120,24 @@ export function App() {
         )}
 
         {activeTab === 'analyze' && (
-          <PlaceholderView
-            title="Evidence-Backed Job Matching"
-            subtitle="Deep resume-to-job analysis with citation extraction"
-            description="Extracts must-have requirements, correlates verifiable resume sentences, distinguishes unmentioned skills, and computes an honest deterministic score."
-            icon={Sparkles}
-            badge="Core Matching Engine"
-            phase="Phase 3"
+          <AnalyzeJobView
             onBack={() => setActiveTab('overview')}
+            onNavigateToResume={() => setActiveTab('resume')}
           />
         )}
 
         {activeTab === 'resume' && (
-          <PlaceholderView
-            title="Local Resume Ingestion & Parsing"
-            subtitle="Multi-format document parsing powered by Gemma"
-            description="Supports PDF, DOCX, and TXT files. Extracts structured skills, experience, projects, and education into verifiable JSON with user correction controls."
-            icon={FileText}
-            badge="Document Pipeline"
-            phase="Phase 2"
-            onBack={() => setActiveTab('overview')}
-          />
+          <ResumeView onBack={() => setActiveTab('overview')} />
         )}
 
-        {activeTab === 'applications' && (
-          <PlaceholderView
-            title="Local Application Tracker"
-            subtitle="Persistent 7-stage job pipeline with CSV export"
-            description="Manage roles across Saved, Preparing, Applied, Interview, Offer, Rejected, and Withdrawn. Connected directly to SQLite."
-            icon={Briefcase}
-            badge="Pipeline Management"
-            phase="Phase 5"
-            onBack={() => setActiveTab('overview')}
-          />
-        )}
+        {activeTab === 'applications' && <ApplicationsView />}
 
         {activeTab === 'saved' && (
-          <PlaceholderView
-            title="Historical Analyses & Reports"
-            subtitle="Audit log of all previous requirement evaluations"
-            description="Review previous company matches, gap recommendations, tailored bullet suggestions, and drafted cover letters."
-            icon={History}
-            badge="History & Export"
-            phase="Phase 3"
-            onBack={() => setActiveTab('overview')}
-          />
+          <SavedAnalysesView onAnalyzeNew={() => setActiveTab('analyze')} />
         )}
 
         {activeTab === 'settings' && (
-          <PlaceholderView
-            title="Ollama Runtime & Data Governance"
-            subtitle="Local model selection, inference timeouts, and data deletion"
-            description="Inspect active GPU memory, test custom Ollama endpoints, adjust temperature, or purge local SQLite records and uploaded files."
-            icon={Settings}
-            badge="Privacy & Governance"
-            phase="Phase 6"
-            onBack={() => setActiveTab('overview')}
-          />
+          <SettingsView aiHealth={aiHealth} onRefreshAi={fetchHealth} />
         )}
       </main>
     </div>
