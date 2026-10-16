@@ -1,0 +1,1105 @@
+# Software Requirements Specification (SRS)
+# JobFit — Local AI Job Application Assistant
+
+**Hacktoberfest 2026 — Open-Source AI Challenge, Week 2: Side Hustle**
+
+| Property | Specification |
+|---|---|
+| Project name | JobFit |
+| Product type | Local-first AI career assistant |
+| Target users | Students, graduates, job seekers, career switchers |
+| AI model | Gemma via Ollama |
+| Frontend | React, Vite, TypeScript |
+| Backend | FastAPI, Python |
+| Local storage | SQLite and local filesystem |
+| Development environment | Antigravity |
+| Existing workspace | Autonomiq |
+| New application folder | `jobfit/` |
+| Planned repository | `jobfit-local-ai` |
+| Primary goal | Compete for the overall Hacktoberfest prize |
+| Partner target | Best Use of Gemma |
+| Secondary targets | Render or Sentry, if useful and feasible |
+| Submission deadline | October 18, 2026 |
+
+---
+
+# 1. Project Overview
+
+## 1.1 Purpose
+
+JobFit is an AI-powered job application assistant that helps job seekers understand how their existing skills and experience relate to a specific job opening.
+
+Job seekers often apply to multiple positions and repeatedly tailor their resumes, identify relevant skills, write cover letters, and track applications.
+
+JobFit simplifies these tasks through local document processing, an open-weight Gemma model, evidence-based matching, and user-controlled document generation.
+
+## 1.2 Problem statement
+
+Existing AI resume tools often require users to upload personal career documents to external services. Some provide generic suggestions, opaque match scores, or resume rewrites that invent qualifications.
+
+JobFit aims to provide:
+
+- Private, local-first resume analysis.
+- Transparent matching between a resume and a job description.
+- Evidence-backed skill matching and gap analysis.
+- Honest, tailored resume suggestions.
+- Editable cover letter drafts.
+- A simple job application tracker.
+
+## 1.3 Product vision
+
+**Help job seekers create stronger, more relevant applications without surrendering control of their personal career data.**
+
+## 1.4 Target users
+
+Primary users:
+
+- College students.
+- Fresh graduates.
+- Software developers.
+- Designers and other professionals.
+- Career switchers.
+- Active job seekers applying to multiple roles.
+
+The MVP focuses on individual users rather than recruitment agencies or enterprise hiring teams.
+
+## 1.5 Core differentiators
+
+1. Gemma performs meaningful analysis rather than serving as a decorative chatbot.
+2. Resume processing and model inference can run locally.
+3. Match results explain which resume evidence supports each finding.
+4. Missing qualifications are distinguished from skills that simply are not mentioned.
+5. Generated content must remain grounded in the user's actual experience.
+6. The application can work without a mandatory cloud LLM API.
+7. Users control, edit, and approve their application documents.
+
+---
+
+# 2. Project Scope
+
+## 2.1 MVP features
+
+The first release must include:
+
+1. Resume upload and parsing.
+2. Job description input.
+3. Resume-to-job analysis.
+4. Matching skills and experience.
+5. Missing or unverified requirement analysis.
+6. Explainable match results.
+7. AI-assisted resume bullet suggestions.
+8. Cover letter draft generation.
+9. Basic application tracking.
+10. Local data storage and privacy controls.
+11. A polished responsive dashboard.
+12. A reproducible installation guide.
+
+## 2.2 Features explicitly excluded from the MVP
+
+Do not implement these unless the core workflow is already complete:
+
+- Automated job scraping.
+- Automatic job applications.
+- Browser automation to submit applications.
+- LinkedIn account integrations.
+- Paid resume-scoring APIs.
+- Multi-agent orchestration.
+- Complex user authentication.
+- Cloud-based resume storage.
+- Fine-tuning a model from scratch.
+- Complex vector databases.
+- Recruitment analytics for employers.
+
+The goal is a complete product, not a large collection of unfinished features.
+
+---
+
+# 3. User Personas and User Stories
+
+## Persona A: Final-year student
+
+A student wants to understand whether their projects and skills align with a software developer role.
+
+User story:
+
+As a student, I want to compare my resume against a job description so I can identify relevant skills and understand what needs improvement.
+
+## Persona B: Active job seeker
+
+A job seeker applies to multiple companies and wants to avoid rewriting their resume from scratch each time.
+
+User story:
+
+As a job seeker, I want to create tailored resume suggestions and cover letter drafts from my existing experience so that I can prepare applications faster.
+
+## Persona C: Career switcher
+
+A professional wants to understand how their existing experience transfers to another field.
+
+User story:
+
+As a career switcher, I want JobFit to identify transferable skills and explain missing requirements without assuming that unmentioned skills are absent.
+
+---
+
+# 4. Functional Requirements
+
+## FR-01: Dashboard
+
+The dashboard shall provide:
+
+- A welcome header.
+- A prominent action to analyze a new job.
+- Total applications tracked.
+- Applications by status.
+- Recent resume analyses.
+- Saved job descriptions.
+- Recent activity.
+- A clear indication of local AI runtime availability.
+
+All counts must come from actual stored records.
+
+The application must not display fabricated match scores or hardcoded production metrics.
+
+## FR-02: Resume Upload
+
+Supported formats:
+
+- PDF.
+- DOCX.
+- TXT.
+
+Requirements:
+
+- Validate file extensions and content where practical.
+- Enforce file-size limits.
+- Use safe filenames and local storage.
+- Extract readable text.
+- Display useful errors for unsupported or unreadable files.
+- Preserve the original file where the user chooses to save it.
+- Allow users to remove their saved resume and related local data.
+- Never upload resume contents to a third-party LLM by default.
+
+For image-based PDFs, OCR is optional for the MVP. If OCR is unavailable, explain the limitation clearly.
+
+## FR-03: Resume Parsing
+
+Extract structured information such as:
+
+- Name, if present.
+- Professional summary.
+- Skills.
+- Work experience.
+- Projects.
+- Education.
+- Certifications.
+- Employment dates.
+
+Requirements:
+
+- Separate document parsing from model inference.
+- Treat extracted information as untrusted input.
+- Do not assume every resume follows the same layout.
+- Preserve the original text.
+- Validate structured model output.
+- Allow the user to correct parsing errors.
+- Do not infer sensitive personal characteristics.
+
+## FR-04: Job Description Input
+
+Users shall be able to:
+
+- Paste a job description.
+- Enter the company name.
+- Enter the role title.
+- Save a job description for later.
+- Reopen a saved analysis.
+
+The application must work without internet access for its core analysis once the model and dependencies are installed.
+
+## FR-05: Resume-to-Job Matching
+
+JobFit shall analyze a resume against a job description.
+
+The analysis should identify:
+
+- Relevant technical skills.
+- Relevant work experience.
+- Relevant projects.
+- Explicitly stated qualifications.
+- Important job requirements not evidenced in the resume.
+- Potentially transferable skills.
+- Areas requiring clarification.
+
+Every major finding should reference evidence from the resume or job description where possible.
+
+The model must not assume that a skill is absent merely because it is not mentioned.
+
+## FR-06: Match Score
+
+The application may provide an indicative match score, provided that it is:
+
+- Based on a documented, reproducible scoring method.
+- Derived from explicit job requirements and resume evidence.
+- Separated from the LLM's free-form opinion.
+- Explained through visible component scores or contributing factors.
+- Clearly described as an estimate, not a prediction of hiring success.
+
+Do not describe the score as an ATS score unless a real ATS system and validated methodology are used.
+
+Do not imply that the score predicts interview or hiring probability.
+
+If a reliable scoring method cannot be completed on time, show a qualitative assessment instead.
+
+## FR-07: Skill Gap Analysis
+
+The application shall distinguish between:
+
+- Skills explicitly supported by resume evidence.
+- Requirements with partial or indirect evidence.
+- Requirements not found in the supplied resume.
+- Requirements that cannot be assessed confidently.
+
+For each finding, display:
+
+- Requirement.
+- Resume evidence, if any.
+- Explanation.
+- Suggested next step.
+
+Suggestions must not instruct users to claim skills or qualifications they do not possess.
+
+## FR-08: Resume Tailoring
+
+Users shall be able to select a section or bullet point and request an improved version.
+
+Requirements:
+
+- Preserve factual meaning.
+- Improve clarity and relevance.
+- Use job-description terminology only when supported by the user's actual experience.
+- Never invent employers, degrees, certifications, projects, achievements, or metrics.
+- Display original and suggested text side by side.
+- Allow users to edit, accept, or reject suggestions.
+- Preserve the original resume.
+- Support copying or downloading the revised content.
+
+## FR-09: Cover Letter Generator
+
+Generate an editable cover letter draft based on:
+
+- The user's resume.
+- The selected job description.
+- The company and role, if supplied.
+- User-provided motivation or relevant context.
+
+Requirements:
+
+- Do not fabricate personal experiences.
+- Do not invent company facts.
+- Use placeholders when essential information is missing.
+- Allow editing before export.
+- Support plain-text or Markdown export.
+
+## FR-10: Application Tracker
+
+Users shall be able to:
+
+- Add an application.
+- Associate it with a company and role.
+- Save the job description.
+- Record the application date.
+- Track status.
+- Add notes.
+- Update the status.
+- Remove an application.
+
+Suggested statuses:
+
+- Saved.
+- Preparing.
+- Applied.
+- Interview.
+- Offer.
+- Rejected.
+- Withdrawn.
+
+The tracker must use local persistent storage.
+
+## FR-11: Local AI Runtime
+
+Use Gemma through Ollama.
+
+Initial model candidate:
+
+`gemma3:1b`
+
+Requirements:
+
+- Configurable model name.
+- Local inference for core analysis.
+- Clear model health status.
+- Graceful handling of unavailable Ollama.
+- Inference timeouts.
+- Schema validation for model output.
+- Controlled retry for malformed output.
+- No fake successful responses.
+- No mandatory cloud LLM API key.
+
+Test model performance on the developer's available hardware before considering a larger model.
+
+## FR-12: Privacy and Data Management
+
+Users must be able to understand:
+
+- Where resume files are stored.
+- Which model processes the documents.
+- Whether any external services are enabled.
+- How to delete stored documents and application records.
+
+By default:
+
+- Store files locally.
+- Store metadata in SQLite.
+- Use local Ollama inference.
+- Avoid sending document contents to telemetry providers.
+- Keep secrets out of source control.
+
+## FR-13: Export
+
+The MVP shall support:
+
+- Copying generated resume suggestions.
+- Downloading a revised resume in a practical format where feasible.
+- Exporting cover letter text.
+- Exporting application tracker data as CSV.
+
+DOCX generation is preferred if it can be implemented without destabilizing the core workflow.
+
+---
+
+# 5. Non-Functional Requirements
+
+## NFR-01: Reliability
+
+- Invalid model output must not corrupt saved data.
+- Model failures must be visible.
+- The application must not fabricate analysis.
+- Saved applications must persist across restarts.
+- Generated documents must remain editable.
+
+## NFR-02: Security
+
+- Validate uploaded file types and sizes.
+- Prevent path traversal.
+- Do not execute uploaded files.
+- Treat document contents as untrusted data.
+- Guard against prompt injection within resume and job-description text.
+- Never expose secrets or unnecessary filesystem paths.
+- Do not send private documents to third-party services without explicit disclosure and consent.
+
+## NFR-03: Maintainability
+
+Separate:
+
+- File parsing.
+- AI inference.
+- Matching logic.
+- Resume editing.
+- Application tracking.
+- Storage.
+- API routes.
+- Frontend feature modules.
+
+Use typed schemas, environment-based configuration, and automated tests.
+
+## NFR-04: Usability
+
+- Keep the main workflow understandable to nontechnical users.
+- Show actionable explanations rather than raw model output.
+- Use clear loading and error states.
+- Provide an accessible, responsive layout.
+- Keep editing and approval under user control.
+
+## NFR-05: Performance
+
+Measure actual inference latency and document the model, hardware, and test set.
+
+Do not promise a fixed response time or accuracy before measurement.
+
+---
+
+# 6. User Experience and Dashboard Design
+
+## 6.1 Visual direction
+
+Use a premium pastel 3D productivity dashboard inspired by modern SaaS interfaces.
+
+Color palette:
+
+- Lavender: `#EAE6F6`
+- Soft lime: `#E8F2B5`
+- Pastel pink: `#F5C9E3`
+- Powder blue: `#B9D8F4`
+- White: `#FFFFFF`
+- Main text: `#202024`
+
+Design requirements:
+
+- Warm off-white background.
+- Dark charcoal sidebar.
+- Rounded cards and subtle shadows.
+- Generous spacing.
+- Clean typography.
+- Lucide icons.
+- A few consistent 3D decorative illustrations.
+- Accessible contrast.
+- Responsive layouts.
+- No decorative object that obstructs important information.
+
+## 6.2 Dashboard navigation
+
+- Overview.
+- Analyze Job.
+- My Resume.
+- Applications.
+- Saved Analyses.
+- Settings.
+
+## 6.3 Dashboard content
+
+The overview page should contain:
+
+- Greeting and quick-start action.
+- Applications tracked.
+- Interviews or active applications.
+- Recent analyses.
+- Saved jobs.
+- A recent activity timeline.
+- Local Gemma runtime status.
+
+## 6.4 Main analysis screen
+
+The core screen should contain:
+
+1. Resume selection.
+2. Job description input.
+3. Analyze button.
+4. Processing state.
+5. Match summary.
+6. Evidence-backed skill matches.
+7. Potential gaps.
+8. Resume improvement suggestions.
+9. Cover letter generation action.
+10. Save analysis action.
+
+The results should be visually clear and easy to demonstrate in a short video.
+
+---
+
+# 7. Technical Architecture
+
+## Frontend
+
+- React.
+- Vite.
+- TypeScript.
+- Existing compatible styling system.
+- Reusable components.
+- Typed API client.
+- Domain-specific feature modules.
+
+## Backend
+
+- Python.
+- FastAPI.
+- Pydantic.
+- SQLite.
+- Local filesystem.
+- Ollama integration.
+- PDF and DOCX parsing libraries.
+- pytest.
+
+## AI responsibilities
+
+Gemma may:
+
+- Interpret job requirements.
+- Extract structured resume information.
+- Identify evidence relevant to requirements.
+- Explain possible gaps.
+- Suggest improved resume wording.
+- Draft cover letters.
+
+Application code must:
+
+- Parse files safely.
+- Validate schemas.
+- Calculate any documented deterministic score.
+- Persist application records.
+- Handle user approval.
+- Manage deletion and exports.
+
+## Suggested project structure
+
+```text
+jobfit/
+├── frontend/
+│   └── src/
+│       ├── components/
+│       ├── pages/
+│       ├── features/
+│       │   ├── resume/
+│       │   ├── analysis/
+│       │   ├── editor/
+│       │   └── applications/
+│       └── lib/
+├── backend/
+│   ├── app/
+│   │   ├── api/
+│   │   ├── ai/
+│   │   ├── services/
+│   │   ├── models/
+│   │   ├── schemas/
+│   │   ├── db.py
+│   │   ├── config.py
+│   │   └── main.py
+│   └── tests/
+├── sample-data/
+├── docs/
+├── .env.example
+├── .gitignore
+├── LICENSE
+└── README.md
+```
+
+Antigravity must inspect the actual workspace before finalizing this structure.
+
+---
+
+# 8. Suggested API Endpoints
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /api/health` | Check application health |
+| `GET /api/health/ai` | Check local model availability |
+| `POST /api/resumes` | Upload and parse a resume |
+| `GET /api/resumes` | List saved resumes |
+| `DELETE /api/resumes/{id}` | Remove a saved resume |
+| `POST /api/jobs` | Save a job description |
+| `POST /api/analyses` | Analyze a resume against a job |
+| `GET /api/analyses/{id}` | Retrieve a saved analysis |
+| `POST /api/analyses/{id}/tailor` | Generate resume improvement suggestions |
+| `POST /api/analyses/{id}/cover-letter` | Generate a cover letter draft |
+| `GET /api/applications` | List tracked applications |
+| `POST /api/applications` | Create an application record |
+| `PATCH /api/applications/{id}` | Update application status |
+| `DELETE /api/applications/{id}` | Delete an application record |
+
+These endpoints are a starting contract. Antigravity may simplify them if the implementation can remain clear and complete.
+
+---
+
+# 9. Open AI and Partner Strategy
+
+## Primary target: Gemma
+
+Use Gemma as the core inference engine.
+
+Evidence to collect:
+
+- Model name and configuration.
+- Example resume and job-description inputs.
+- Structured analysis output.
+- Failure handling.
+- Actual inference latency.
+- Results from a small, documented test set.
+
+Explain that Gemma is an open-weight model and describe its applicable license accurately.
+
+## Optional target: Render
+
+Consider Render only if a hosted demo materially improves judging.
+
+Important distinction:
+
+A hosted web application is not automatically local-first. Clearly explain which components run on the hosted server and which run locally. Do not promise local processing if resume files are sent to a remote backend.
+
+## Optional target: Sentry
+
+Use Sentry only if it can be configured safely to capture actionable errors without leaking resume text, contact details, or job application content.
+
+## Integration rule
+
+Do not add a partner technology solely for its logo.
+
+Every claimed integration must work, be documented, and contribute to the project.
+
+Prioritize the core product and Gemma over optional integrations.
+
+---
+
+# 10. Testing Strategy
+
+## Functional tests
+
+Test:
+
+- Valid PDF and DOCX resumes.
+- Invalid and oversized uploads.
+- Unreadable documents.
+- Empty job descriptions.
+- Missing resume fields.
+- Malformed model responses.
+- Ollama unavailable.
+- Resume analysis persistence.
+- Resume suggestion editing.
+- Cover letter generation.
+- Application status changes.
+- File and record deletion.
+- Export functionality.
+
+## Matching-quality tests
+
+Create a small synthetic dataset of resume/job-description pairs with manually documented evidence.
+
+Evaluate:
+
+- Whether relevant skills are identified.
+- Whether matching evidence is accurate.
+- Whether missing requirements are described cautiously.
+- Whether the model invents experience.
+- Whether the explanation matches the source documents.
+
+Do not claim the matching score predicts hiring success.
+
+## Privacy tests
+
+Verify that:
+
+- Core inference uses local Ollama.
+- Resume content is not sent to external LLM APIs.
+- Sensitive document content is not written to logs.
+- Deletion removes the appropriate local files and records.
+- Optional external integrations are clearly disclosed.
+
+## Benchmark report
+
+Record:
+
+- Hardware.
+- Model and configuration.
+- Number of test cases.
+- Latency.
+- Matching-quality observations.
+- Failure cases.
+- Known limitations.
+
+Report only actual measurements.
+
+---
+
+# 11. Phase-by-Phase Antigravity Prompt Pack
+
+Each prompt must be executed separately.
+
+After each phase, review the changed files and test results. Do not allow Antigravity to execute the entire project plan autonomously.
+
+## PHASE 0 — Repository Audit
+
+### Objective
+
+Inspect the existing Autonomiq workspace and determine the safest implementation approach.
+
+### Prompt 0
+
+You are the senior software architect responsible for preparing JobFit, a local-first AI job application assistant for the Hacktoberfest 2026 Week 2 Side Hustle challenge.
+
+The existing workspace is Autonomiq. The new application will eventually live in a separate `jobfit/` folder and be published as an independent repository.
+
+For this phase, do not create or modify files.
+
+Tasks:
+
+1. Inspect the existing repository, README, dependencies, frontend, backend, tests, model configuration, storage, and startup scripts.
+2. Identify reusable generic development patterns and components.
+3. Identify code that is specific to the original research assistant and should not be copied.
+4. Check whether Gemma and Ollama are configured and whether runtime availability can actually be verified.
+5. Consider the developer's available hardware and local inference constraints.
+6. Propose a clean architecture for JobFit.
+7. Identify the smallest complete user workflow.
+8. Identify dependency and setup risks.
+9. Evaluate whether optional partner integrations are worth attempting.
+10. Identify challenge eligibility concerns associated with reusing an existing project.
+
+Deliver:
+
+- Repository audit.
+- Reuse, rebuild, and exclude matrix.
+- Proposed folder structure.
+- Dependency recommendations.
+- First vertical slice.
+- Testing plan.
+- Risks and unresolved questions.
+
+Do not edit files, install dependencies, initialize Git, or start implementation.
+
+Wait for explicit approval before Phase 1.
+
+---
+
+## PHASE 1 — Application Foundation and Dashboard
+
+### Objective
+
+Create the isolated application and establish its basic UI and backend.
+
+### Prompt 1
+
+Using the approved Phase 0 audit, create the JobFit application inside `jobfit/`.
+
+Requirements:
+
+1. Do not modify the original Autonomiq application.
+2. Create the minimum independent frontend and backend structure.
+3. Use React, Vite, TypeScript, FastAPI, and Pydantic if compatible with the audited environment.
+4. Create a separate SQLite database configuration.
+5. Add environment-based configuration and `.env.example`.
+6. Establish frontend-to-backend communication.
+7. Add application and AI health endpoints.
+8. Implement the agreed pastel 3D dashboard theme.
+9. Add navigation for Overview, Analyze Job, My Resume, Applications, Saved Analyses, and Settings.
+10. Include meaningful loading, error, and empty states.
+11. Do not hardcode production dashboard metrics.
+12. Do not implement every feature in this phase.
+13. Do not initialize Git.
+
+Run available checks and report the actual results.
+
+Wait for approval before Phase 2.
+
+---
+
+## PHASE 2 — Local Gemma and Resume Parsing
+
+### Objective
+
+Make resume upload, parsing, and local model inference work.
+
+### Prompt 2
+
+Implement resume upload, text extraction, and local Gemma integration.
+
+Requirements:
+
+1. Support PDF, DOCX, and TXT resumes.
+2. Validate file type and size.
+3. Store files locally using safe generated filenames.
+4. Extract readable text with appropriate parsing libraries.
+5. Use Gemma through Ollama for structured resume analysis.
+6. Make the model name configurable, initially using `gemma3:1b`.
+7. Validate model responses using Pydantic.
+8. Handle malformed responses, missing fields, timeouts, and model unavailability.
+9. Never fabricate successful extraction results.
+10. Do not require a cloud LLM API.
+11. Keep document content out of unnecessary logs.
+12. Treat uploaded content as untrusted data.
+13. Add tests using synthetic resumes and mocked inference.
+
+Verify the runtime when available and clearly report whether actual inference was tested.
+
+Do not implement job matching yet.
+
+Wait for approval before Phase 3.
+
+---
+
+## PHASE 3 — Job Matching and Skill Gap Analysis
+
+### Objective
+
+Implement the core differentiating feature.
+
+### Prompt 3
+
+Implement resume-to-job-description analysis.
+
+Requirements:
+
+1. Allow users to paste a job description.
+2. Support company name and role title.
+3. Extract job requirements into structured data.
+4. Compare requirements with the parsed resume.
+5. Identify matching skills and supporting evidence.
+6. Identify partially supported requirements.
+7. Identify requirements not found in the supplied resume.
+8. Distinguish missing evidence from confirmed absence of a skill.
+9. Generate clear explanations for each finding.
+10. Optionally calculate a transparent match score using a documented deterministic method.
+11. Never describe the score as a probability of being hired.
+12. Avoid sensitive personal attributes in matching.
+13. Persist analyses locally.
+14. Display the results in a polished interface.
+15. Handle invalid model output and unavailable inference safely.
+16. Add tests for fabricated claims, missing evidence, and inconsistent results.
+
+The primary user journey must work:
+
+Upload resume → Enter job description → Analyze → Review matching evidence and gaps.
+
+Wait for approval before Phase 4.
+
+---
+
+## PHASE 4 — Resume Tailoring and Cover Letters
+
+### Objective
+
+Help users prepare application material without fabricating qualifications.
+
+### Prompt 4
+
+Implement resume tailoring and cover letter drafting.
+
+Requirements:
+
+1. Let users select a resume section or bullet point.
+2. Generate improved wording using the relevant job description.
+3. Preserve the user's actual experience and factual claims.
+4. Do not invent achievements, metrics, qualifications, employers, or certifications.
+5. Show original and suggested text side by side.
+6. Allow users to edit, accept, or reject suggestions.
+7. Generate a cover letter based on the resume, job description, role, and supplied context.
+8. Use placeholders for missing information instead of inventing facts.
+9. Allow users to copy and export generated text.
+10. Preserve the original resume.
+11. Add tests for hallucinated qualifications and missing context.
+12. Keep model errors visible and recoverable.
+
+Do not add automated applications or external account integrations.
+
+Wait for approval before Phase 5.
+
+---
+
+## PHASE 5 — Application Tracker and Dashboard Integration
+
+### Objective
+
+Make JobFit useful for repeated job applications.
+
+### Prompt 5
+
+Implement the application tracker and finish the dashboard integration.
+
+Requirements:
+
+1. Allow users to save a company, role, job description, and application date.
+2. Support Saved, Preparing, Applied, Interview, Offer, Rejected, and Withdrawn statuses.
+3. Allow users to add notes.
+4. Connect saved analyses to their associated applications.
+5. Display real counts and recent activity.
+6. Provide useful filters.
+7. Persist data in SQLite.
+8. Add CSV export if feasible.
+9. Implement clear empty states.
+10. Ensure deleting records and files follows a consistent policy.
+11. Add tests for persistence, status updates, filtering, and dashboard metrics.
+12. Avoid hardcoded sample metrics in the production interface.
+
+Wait for approval before Phase 6.
+
+---
+
+## PHASE 6 — Reliability, Privacy, and UI Polish
+
+### Objective
+
+Prepare a complete and dependable application.
+
+### Prompt 6
+
+Audit the complete JobFit application.
+
+Tasks:
+
+1. Run backend tests.
+2. Run frontend linting, type checks, and tests.
+3. Test the entire resume-to-job-analysis workflow.
+4. Test malformed files and model responses.
+5. Test Ollama unavailability and recovery.
+6. Verify resume and application persistence.
+7. Verify file deletion and data deletion.
+8. Review prompt-injection safeguards.
+9. Check for sensitive information in logs.
+10. Review accessibility and responsive behavior.
+11. Fix the highest-impact usability issues.
+12. Remove unnecessary dependencies where safe.
+13. Preserve the original Autonomiq application.
+14. Produce a report of actual test results and remaining issues.
+
+Do not claim tests passed unless they were executed.
+
+Wait for approval before Phase 7.
+
+---
+
+## PHASE 7 — Gemma Evidence and Optional Partner Integration
+
+### Objective
+
+Demonstrate meaningful open-weight AI usage.
+
+### Prompt 7
+
+Prepare and verify the Gemma integration.
+
+1. Confirm that the model is used in real resume analysis and generation workflows.
+2. Document model configuration and local runtime setup.
+3. Build a small synthetic evaluation dataset.
+4. Measure latency on the actual development hardware.
+5. Evaluate matching evidence and fabricated-claim behavior.
+6. Document the test methodology and actual results.
+7. Explain why local inference is useful for private career documents.
+8. Evaluate Render or Sentry only if the core application is stable and the integration can be verified.
+9. Do not add partner integrations merely for their logos.
+10. Avoid sending sensitive resume contents to external services.
+11. Document all external dependencies and privacy boundaries.
+
+Do not fabricate benchmark results or claim a partner integration works without testing it.
+
+Wait for approval before Phase 8.
+
+---
+
+## PHASE 8 — Documentation, Demo, and DEV.to Article
+
+### Objective
+
+Prepare the project for competition evaluation.
+
+### Prompt 8
+
+Prepare the final JobFit documentation and Hacktoberfest Week 2 submission.
+
+Create or complete:
+
+1. README.
+2. Setup instructions.
+3. Gemma and Ollama installation instructions.
+4. `.env.example`.
+5. API documentation.
+6. Testing instructions.
+7. Synthetic sample data.
+8. Architecture diagram.
+9. Actual application screenshots.
+10. Benchmark report.
+11. Privacy and security explanation.
+12. Known limitations.
+13. License and attribution.
+14. Verified demo instructions.
+
+Draft a DEV.to article using this structure:
+
+- What I built.
+- The problem it solves.
+- Who would pay for it.
+- Demo.
+- Code repository.
+- How I built it.
+- How Gemma powers the workflow.
+- Why open innovation matters.
+- Actual evaluation results.
+- Lessons learned.
+- My agent session, if available.
+- My first user, if actually tested.
+- Prize categories that genuinely apply.
+
+Explain that local inference reduces dependence on hosted LLM APIs but still consumes hardware and electricity.
+
+Do not invent customer feedback, user counts, performance improvements, or revenue.
+
+Check the official challenge submission instructions and verify the required tags and links.
+
+Wait for approval before Phase 9.
+
+---
+
+## PHASE 9 — Independent Repository and Publication
+
+### Objective
+
+Prepare a clean, standalone repository.
+
+### Prompt 9
+
+Prepare JobFit for independent GitHub publication.
+
+Requirements:
+
+1. Inspect the entire `jobfit/` directory.
+2. Ensure it contains all required code and documentation.
+3. Verify it has no unintended dependencies on files outside its directory.
+4. Remove secrets, private resumes, local databases, caches, virtual environments, and generated artifacts from the publication copy.
+5. Retain only synthetic sample data.
+6. Verify `.gitignore` and `.env.example`.
+7. Check for credentials and personal information.
+8. Verify clean installation and startup.
+9. Produce a final file inventory and publication checklist.
+10. Do not modify the original Autonomiq application.
+
+Do not initialize Git or push until explicit approval.
+
+After approval:
+
+- Move or copy the finalized folder outside the original workspace.
+- Open the standalone directory.
+- Initialize a new Git repository.
+- Create a separate GitHub repository named `jobfit-local-ai`.
+- Commit and push the application.
+- Verify the published repository and README.
+- Publish the DEV.to article and verify the challenge entry.
+
+Before submission, confirm that the new-project and code-reuse requirements are satisfied. A separate repository alone does not guarantee eligibility.
+
+Stop before irreversible actions and request approval.
+
+---
+
+# 12. Final Acceptance Criteria
+
+JobFit is ready for submission when:
+
+- [ ] The original Autonomiq application remains intact.
+- [ ] The JobFit application runs independently.
+- [ ] Gemma inference works locally.
+- [ ] Resume parsing works for supported file types.
+- [ ] Job descriptions can be analyzed.
+- [ ] Matching findings have supporting evidence.
+- [ ] Skill gaps are explained carefully.
+- [ ] Resume suggestions preserve factual claims.
+- [ ] Cover letter drafts are editable.
+- [ ] Applications persist across restarts.
+- [ ] Failure handling and privacy tests pass.
+- [ ] Actual benchmark results are documented.
+- [ ] The README supports reproducible installation.
+- [ ] The new GitHub repository is verified.
+- [ ] The DEV.to article explains why open innovation matters.
+- [ ] Challenge eligibility and submission requirements are checked.
+- [ ] The entry is submitted before the deadline.
+
+---
+
+# 13. Immediate Next Step
+
+Open the existing Autonomiq workspace in Antigravity.
+
+Paste **Phase 0 — Repository Audit** only.
+
+Review the report before permitting any code changes.
+
+The execution sequence is:
+
+**Audit → Foundation → Resume parsing → Job matching → Resume tailoring → Application tracker → Reliability → Gemma evidence → Documentation → Separate repository → Submission.**
+
+The most important success criterion is a working, trustworthy user journey. Prioritize local Gemma inference, evidence-backed matching, and truthful resume tailoring over optional features.

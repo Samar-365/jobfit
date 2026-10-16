@@ -1,0 +1,426 @@
+# ==============================================================================
+# JobFit — Implementation Plan
+# Local-First AI Job Application Assistant
+# Hacktoberfest 2026 — Open-Source AI Challenge (Week 2: Side Hustle)
+# Target Submission Deadline: October 18, 2026
+# ==============================================================================
+
+PROJECT OVERVIEW
+----------------
+Product:          JobFit
+Type:             Local-first AI Career Assistant
+Primary Goal:     Compete for overall Hacktoberfest prize & "Best Use of Gemma"
+Core Technologies:
+  - AI Engine:    Gemma (initial model candidate: gemma3:1b) via Ollama
+  - Frontend:     React, Vite, TypeScript, Vanilla CSS (Pastel 3D theme)
+  - Backend:      Python 3.10+, FastAPI, Pydantic v2
+  - Storage:      SQLite (metadata/applications) & Local Filesystem (documents)
+  - Testing:      pytest (backend), Vitest/Playwright (frontend), synthetic benchmarks
+
+Core Principles:
+  1. 100% Local Inference & Privacy: No career documents sent to cloud LLMs.
+  2. Grounded Evidence: Every match or gap must cite verifiable resume text.
+  3. No Hallucinations: Never invent experience, metrics, or credentials.
+  4. Non-Predictive Matching: Deterministic, transparent score; no fake "ATS" guarantees.
+  5. Phased Gate Execution: Each phase must be independently verified before advancing.
+
+
+==============================================================================
+SYSTEM ARCHITECTURE & DIRECTORY STRUCTURE
+==============================================================================
+
+jobfit/
+├── frontend/
+│   ├── index.html
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── vite.config.ts
+│   └── src/
+│       ├── main.tsx
+│       ├── App.tsx
+│       ├── index.css                     # Pastel 3D theme variables & typography
+│       ├── components/
+│       │   ├── layout/                   # Sidebar, TopNav, AppLayout
+│       │   ├── ui/                       # Button, Card, Badge, Modal, Tooltip, Alert
+│       │   └── status/                   # OllamaStatusIndicator, LoadingSpinner
+│       ├── features/
+│       │   ├── dashboard/                # MetricCards, RecentActivity, QuickActions
+│       │   ├── resume/                   # ResumeUploader, ParsedResumeViewer, FieldEditor
+│       │   ├── analysis/                 # JobInputForm, MatchScoreCard, EvidenceList, GapAnalysis
+│       │   ├── tailoring/                # BulletDiffViewer, SideBySideEditor, SuggestionActions
+│       │   ├── cover_letter/             # CoverLetterEditor, ContextForm, ExportActions
+│       │   └── applications/             # ApplicationTable, StatusBadge, ApplicationModal
+│       ├── lib/
+│       │   ├── api.ts                    # Typed FastAPI client
+│       │   ├── types.ts                  # Shared data schemas
+│       │   └── formatters.ts             # Date and string formatters
+│       └── assets/                       # Custom pastel 3D icons and illustrations
+│
+├── backend/
+│   ├── requirements.txt
+│   ├── .env.example
+│   ├── app/
+│   │   ├── __init__.py
+│   │   ├── main.py                       # FastAPI entrypoint, CORS, routes
+│   │   ├── config.py                     # App settings, paths, Ollama config
+│   │   ├── db.py                         # SQLite engine, session management
+│   │   ├── api/
+│   │   │   ├── health.py                 # System health and AI/Ollama status check
+│   │   │   ├── resumes.py                # Upload, parse, retrieve, delete resumes
+│   │   │   ├── jobs.py                   # Create and list job descriptions
+│   │   │   ├── analyses.py               # Matching, gap analysis, tailoring, cover letter
+│   │   │   └── applications.py           # Application tracker CRUD
+│   │   ├── ai/
+│   │   │   ├── ollama_client.py          # Resilient Ollama HTTP client with timeouts
+│   │   │   ├── prompts.py                # Gemma prompts with anti-injection fences
+│   │   │   ├── parser.py                 # Resume structured extraction via Gemma
+│   │   │   ├── matcher.py                # Requirement extraction & evidence correlation
+│   │   │   ├── tailoring.py              # Guarded bullet point rephraser
+│   │   │   └── cover_letter.py           # Context-grounded cover letter generator
+│   │   ├── services/
+│   │   │   ├── file_parser.py            # PDF (pypdf/pdfplumber), DOCX (python-docx), TXT
+│   │   │   ├── scoring_engine.py         # Deterministic mathematical requirement scoring
+│   │   │   └── export_service.py         # CSV & Markdown export generators
+│   │   ├── models/
+│   │   │   ├── resume.py                 # SQLAlchemy Resume model
+│   │   │   ├── job.py                    # SQLAlchemy JobDescription model
+│   │   │   ├── analysis.py               # SQLAlchemy Analysis model
+│   │   │   └── application.py            # SQLAlchemy Application model
+│   │   └── schemas/
+│   │       ├── common.py                 # Health schemas, pagination
+│   │       ├── resume.py                 # Structured resume schema (Pydantic)
+│   │       ├── job.py                    # Structured job requirement schema
+│   │       ├── analysis.py               # Match findings, evidence, gap schemas
+│   │       └── application.py            # Application tracking schemas
+│   └── tests/
+│       ├── conftest.py                   # Test fixtures, DB mocking, mock Ollama
+│       ├── test_file_parsers.py          # PDF/DOCX/TXT extraction unit tests
+│       ├── test_scoring_engine.py        # Deterministic scoring logic verification
+│       ├── test_resume_parser.py         # Parsing edge cases & malformed resumes
+│       ├── test_matcher.py               # Evidence matching & missing-evidence logic
+│       ├── test_tailoring_guardrails.py  # Hallucination & fabrication prevention tests
+│       ├── test_applications_crud.py     # SQLite persistence & filtering tests
+│       └── test_privacy_boundaries.py    # Zero leakage & deletion verification
+│
+├── sample-data/
+│   ├── resumes/                          # Synthetic sample resumes (PDF, DOCX, TXT)
+│   ├── job-descriptions/                 # Standard job postings (Junior, Mid, Switcher)
+│   └── evaluation-set/                   # Gold-standard resume/job pairs with known evidence
+│
+├── docs/
+│   ├── ARCHITECTURE.md                  # Component diagrams & data flows
+│   ├── BENCHMARK_REPORT.md              # Latency & accuracy on target hardware
+│   └── PRIVACY_AND_SECURITY.md          # Data retention, local runtime guarantees
+│
+├── .gitignore
+├── LICENSE                               # Apache 2.0 / MIT
+└── README.md                             # Comprehensive reproducible setup guide
+
+
+==============================================================================
+PHASE-BY-PHASE EXECUTION PLAN
+==============================================================================
+
+------------------------------------------------------------------------------
+PHASE 0: REPOSITORY AUDIT & ARCHITECTURAL BLUEPRINT
+------------------------------------------------------------------------------
+Goal: Inspect environment, verify tooling availability, and establish safe boundaries.
+
+Tasks:
+  [ ] 0.1 Audit local environment: Python version, Node.js/npm, Ollama installation.
+  [ ] 0.2 Check Ollama service status and verify Gemma model availability (e.g. gemma3:1b).
+  [ ] 0.3 Define the Reuse / Rebuild / Exclude boundary matrix.
+  [ ] 0.4 Document potential risks: small model schema compliance, inference timeouts.
+  [ ] 0.5 Confirm strict non-interference policy with any external projects.
+  [ ] 0.6 Produce Phase 0 Audit Report and await user sign-off.
+
+Deliverables:
+  - Repository Audit Report
+  - Hardware & AI runtime status verification
+  - Risk mitigation registry
+
+Gate Criteria:
+  - Explicit confirmation of runtime constraints and architecture before creating project files.
+
+------------------------------------------------------------------------------
+PHASE 1: APPLICATION FOUNDATION & PASTEL 3D DASHBOARD
+------------------------------------------------------------------------------
+Goal: Build the isolated project skeleton with FastAPI backend and React frontend.
+
+Tasks:
+  [x] 1.1 Initialize `jobfit/` directory with `backend/` and `frontend/` folders.
+  [x] 1.2 Backend setup:
+        - FastAPI application setup with CORS middleware.
+        - SQLite database connection (`db.py`) with SQLAlchemy 2.0.
+        - Pydantic v2 settings management (`config.py`).
+        - Endpoints: `GET /api/health` and `GET /api/health/ai`.
+  [ ] 1.3 Frontend setup:
+        - Vite + React + TypeScript scaffold.
+        - Design system implementation in `index.css`:
+          * Lavender (`#EAE6F6`), Soft Lime (`#E8F2B5`), Pastel Pink (`#F5C9E3`),
+            Powder Blue (`#B9D8F4`), Charcoal Sidebar (`#202024`), Warm off-white background.
+          * Typography (Inter/Outfit), rounded cards, glassmorphism accents, subtle 3D depth.
+  [ ] 1.4 Dashboard Navigation & Views:
+        - Views: Overview, Analyze Job, My Resume, Applications, Saved Analyses, Settings.
+        - Dashboard metric cards: Total Applications, In Progress, Interviews, Model Status.
+        - Dynamic Ollama connection status banner with manual check/retry button.
+        - Empty states with call-to-actions for initial user onboarding.
+  [ ] 1.5 Validation:
+        - Start backend and frontend, verify `/api/health` communication.
+
+Deliverables:
+  - Running FastAPI server with health check endpoints.
+  - Interactive React dashboard reflecting the pastel 3D productivity aesthetic.
+
+Gate Criteria:
+  - Frontend successfully renders dashboard and reflects real backend health status.
+
+------------------------------------------------------------------------------
+PHASE 2: LOCAL GEMMA INTEGRATION & MULTI-FORMAT RESUME PARSING
+------------------------------------------------------------------------------
+Goal: Ingest PDF, DOCX, and TXT resumes, extract raw text, and parse into structured schemas.
+
+Tasks:
+  [ ] 2.1 File Ingestion Service (`file_parser.py`):
+        - Implement robust text extraction for PDF (`pypdf` / `pdfplumber`), DOCX (`docx`), TXT.
+        - File-size validation (max 5MB) and MIME-type integrity checks.
+        - Sanitized storage using UUID-based local filenames (preventing path traversal).
+  [ ] 2.2 Local Ollama Client (`ollama_client.py`):
+        - Asynchronous HTTP client targeting `http://localhost:11434/api/generate`.
+        - Configurable timeout (default: 45s) and graceful error handling.
+  [ ] 2.3 Structured Resume Parser (`parser.py`):
+        - Gemma prompt template with anti-injection barriers.
+        - Target schema: Name, Summary, Skills (Technical & Soft), Experience, Projects, Education.
+        - Strict Pydantic parsing with repair retry loop if output JSON is malformed.
+  [ ] 2.4 API & UI Implementation:
+        - Endpoints: `POST /api/resumes`, `GET /api/resumes`, `DELETE /api/resumes/{id}`.
+        - UI: Drag-and-drop file upload, extraction progress indicator.
+        - UI: Structured Resume Viewer allowing the user to review and manually edit parsed fields.
+  [ ] 2.5 Tests:
+        - Unit tests for PDF, DOCX, and TXT parsers.
+        - Mocked inference tests verifying fallback on malformed JSON or Ollama disconnect.
+
+Deliverables:
+  - End-to-end file upload and structured parsing pipeline.
+  - User-facing resume editor for verifying extracted details.
+
+Gate Criteria:
+  - Sample resume in PDF/DOCX parses correctly into structured JSON and displays in UI.
+
+------------------------------------------------------------------------------
+PHASE 3: EVIDENCE-BACKED JOB MATCHING & SKILL GAP ANALYSIS
+------------------------------------------------------------------------------
+Goal: Implement the core differentiating capability: explainable matching with cited evidence.
+
+Tasks:
+  [ ] 3.1 Job Description Ingestion:
+        - Endpoint: `POST /api/jobs` (paste text, company, role title).
+        - Structured requirement extraction (Must-Have vs. Nice-to-Have qualifications).
+  [ ] 3.2 Evidence Matching Engine (`matcher.py`):
+        - Prompt Gemma to evaluate each job requirement against parsed resume data.
+        - For each requirement, classify status:
+          * `EXACT_MATCH`: Explicit resume evidence found (quote exact snippet).
+          * `PARTIAL_MATCH`: Indirect or transferable experience identified.
+          * `NOT_MENTIONED`: No evidence present in the submitted document.
+          * `UNASSESSABLE`: Cannot be determined from the document.
+        - Strict constraint: Missing evidence must NEVER be reported as "user lacks this skill".
+  [ ] 3.3 Deterministic Scoring Engine (`scoring_engine.py`):
+        - Transparent mathematical formula based on verified requirements ratio:
+          Score = (Weighted Matched Requirements / Total Requirements) * 100.
+        - Zero black-box hallucinated scoring.
+        - Explicit UI disclaimers: "Estimated match based on supplied text. Not an ATS guarantee."
+  [ ] 3.4 API & UI Integration:
+        - Endpoint: `POST /api/analyses` and `GET /api/analyses/{id}`.
+        - UI: Match Summary Card with component score breakdowns.
+        - UI: Evidence Matrix displaying each requirement alongside verbatim resume quotes.
+        - UI: Actionable Gap List with recommendations on how to address unevidenced areas.
+
+Deliverables:
+  - Complete resume-to-job matching pipeline with cited source quotes.
+  - Transparent match breakdown UI.
+
+Gate Criteria:
+  - Demonstration that every positive match includes verifiable resume evidence.
+
+------------------------------------------------------------------------------
+PHASE 4: GROUNDED RESUME TAILORING & COVER LETTER DRAFTER
+------------------------------------------------------------------------------
+Goal: Empower users to improve resume wording and generate cover letters without fabricating claims.
+
+Tasks:
+  [ ] 4.1 Truthful Resume Tailoring Engine (`tailoring.py`):
+        - Select specific bullet point from parsed resume.
+        - Provide relevant target job requirements to Gemma.
+        - Guardrail prompt:
+          * Align terminology and action verbs to the job description.
+          * STRICTLY FORBID inventing achievements, metrics, companies, or degrees.
+          * If a metric is missing, retain the original factual core.
+  [ ] 4.2 Side-by-Side Tailoring UI:
+        - Diff view showing Original text vs. Suggested text.
+        - One-click "Accept", "Edit Manually", or "Reject" actions.
+        - Copy revised bullet to clipboard.
+  [ ] 4.3 Context-Grounded Cover Letter Generator (`cover_letter.py`):
+        - Prompt utilizing user resume, target job description, and optional user motivation notes.
+        - Strict placeholder policy: When key details are unstated, output explicit tokens
+          such as `[Specific reason why you admire Company X]` rather than making up stories.
+        - In-browser markdown editor for instant customization.
+  [ ] 4.4 Tests:
+        - Adversarial test cases confirming the model rejects prompts asking to fabricate degrees.
+
+Deliverables:
+  - Resume bullet point rephraser with side-by-side diffing.
+  - Cover letter generator with placeholder protections and markdown export.
+
+Gate Criteria:
+  - Automated tests prove that tailored suggestions never introduce unevidenced credentials.
+
+------------------------------------------------------------------------------
+PHASE 5: APPLICATION TRACKER & DASHBOARD INTEGRATION
+------------------------------------------------------------------------------
+Goal: Provide persistent, organized job application management connected to analyses.
+
+Tasks:
+  [ ] 5.1 Application Tracker Data Model & CRUD:
+        - SQLite schema for `applications` table:
+          id, company, role, job_description_id, resume_id, analysis_id,
+          status, applied_date, salary_range, notes, created_at, updated_at.
+        - Supported statuses: `Saved`, `Preparing`, `Applied`, `Interview`, `Offer`, `Rejected`, `Withdrawn`.
+        - Endpoints: `GET /api/applications`, `POST /api/applications`,
+                     `PATCH /api/applications/{id}`, `DELETE /api/applications/{id}`.
+  [ ] 5.2 Application Tracker UI:
+        - Filterable table / Kanban-style view.
+        - Quick modal to log an application directly from a completed Analysis screen.
+        - Inline status switcher and notes editor.
+  [ ] 5.3 Export Capabilities:
+        - CSV export for application records.
+        - Markdown/Text export for cover letters and analysis reports.
+  [ ] 5.4 Dashboard Integration:
+        - Live aggregation of application status counts directly from SQLite.
+        - Timeline of recent analyses and upcoming interview dates.
+
+Deliverables:
+  - Full-featured local application tracking system.
+  - CSV export and unified dashboard analytics.
+
+Gate Criteria:
+  - Full lifecycle test: Analyze Job -> Save Application -> Update Status -> Export CSV.
+
+------------------------------------------------------------------------------
+PHASE 6: SYSTEM HARDENING, PRIVACY SAFEGUARDS & UI POLISH
+------------------------------------------------------------------------------
+Goal: Ensure production-grade reliability, security boundaries, and responsive aesthetics.
+
+Tasks:
+  [ ] 6.1 Security & Prompt Injection Audit:
+        - Wrap all untrusted resume and job text in strict XML/markdown boundary tokens.
+        - Verify protection against prompt injection attempts designed to force high scores.
+        - Path traversal tests on resume upload endpoints.
+  [ ] 6.2 Privacy & Local Data Sanitization:
+        - Audit logs to guarantee that no candidate names, contact details, or resumes are logged.
+        - Comprehensive "Delete Data" action: wipes SQLite records and deletes uploaded files.
+  [ ] 6.3 UI Polish & Accessibility:
+        - Ensure responsive layout across standard laptops and mobile screens.
+        - Keyboard accessibility and ARIA labels on all modal triggers.
+        - Micro-interactions: hover transitions, animated score progress, smooth accordion toggles.
+  [ ] 6.4 Comprehensive Test Suite:
+        - Run `pytest` across all backend endpoints and edge cases.
+        - Frontend type check (`tsc --noEmit`) and build test (`npm run build`).
+
+Deliverables:
+  - Fully tested, secure, and privacy-hardened application.
+  - Zero-warning clean frontend build.
+
+Gate Criteria:
+  - All automated tests passing; verified zero external data transmission.
+
+------------------------------------------------------------------------------
+PHASE 7: GEMMA BENCHMARKS & EVALUATION EVIDENCE
+------------------------------------------------------------------------------
+Goal: Document verifiable proof of Gemma integration for the competition submission.
+
+Tasks:
+  [ ] 7.1 Synthetic Benchmark Suite:
+        - Prepare 5 synthetic resume/job pairs representing distinct archetypes:
+          1. College graduate applying for Junior Frontend Dev.
+          2. Mid-level Fullstack Dev applying for Senior Backend Role.
+          3. Marketing Specialist transitioning to Product Manager (Career Switcher).
+          4. Resume with severe gaps / mismatched skills.
+          5. Adversarial resume containing prompt injection instructions.
+  [ ] 7.2 Benchmark Metrics Collection:
+        - Measure actual inference latency (seconds per analysis) on the host machine.
+        - Measure tokens/sec and memory consumption during inference.
+        - Quantify extraction accuracy and hallucination rate (target: 0% unevidenced claims).
+  [ ] 7.3 Partner Technology Evaluation:
+        - Evaluate Render / Sentry strictly against value and privacy constraints.
+        - If not enhancing the local-first ethos, cleanly document reason for exclusion.
+  [ ] 7.4 Compile `docs/BENCHMARK_REPORT.md` with honest, unexaggerated metrics.
+
+Deliverables:
+  - Documented benchmark report with actual measured performance numbers.
+  - Verified evaluation dataset in `sample-data/evaluation-set/`.
+
+Gate Criteria:
+  - Reproducible benchmark script providing real Gemma latency and accuracy logs.
+
+------------------------------------------------------------------------------
+PHASE 8: DOCUMENTATION, DEMOS & DEV.TO ARTICLE
+------------------------------------------------------------------------------
+Goal: Produce compelling documentation and contest submission artifacts.
+
+Tasks:
+  [ ] 8.1 Write Comprehensive `README.md`:
+        - High-impact project banner and product summary.
+        - Quickstart guide (step-by-step setup for Ollama + Gemma + JobFit).
+        - Architecture overview and data privacy guarantees.
+        - Clear list of supported features and known limitations.
+  [ ] 8.2 Create Visual Artifacts:
+        - Application screenshots highlighting the pastel 3D UI and evidence matches.
+        - Clean Mermaid diagrams detailing the offline processing flow.
+  [ ] 8.3 Draft DEV.to Submission Article (`docs/DEV_ARTICLE_DRAFT.md`):
+        - Title & Hook: Why local-first AI is the ethical future for job seekers.
+        - What I Built & The Problem It Solves.
+        - How Gemma Powers JobFit (technical details on prompt design and structured parsing).
+        - Benchmark & Evaluation Results.
+        - What's Next & Hacktoberfest reflection.
+        - Proper tags: `#hacktoberfest`, `#ai`, `#opensource`, `#gemma`.
+
+Deliverables:
+  - Complete, reproducible documentation.
+  - Ready-to-publish DEV.to submission draft.
+
+Gate Criteria:
+  - A third-party developer can follow the README and start the app in under 5 minutes.
+
+------------------------------------------------------------------------------
+PHASE 9: STANDALONE REPOSITORY PREPARATION & PUBLICATION
+------------------------------------------------------------------------------
+Goal: Package the clean, independent `jobfit-local-ai` repository and verify submission.
+
+Tasks:
+  [ ] 9.1 Sanitize Codebase:
+        - Purge any temporary SQLite databases, uploaded user resumes, and pycache artifacts.
+        - Verify `.gitignore` covers `.env`, `*.db`, `uploads/`, `node_modules/`, `__pycache__/`.
+        - Ensure `.env.example` provides default configuration values.
+  [ ] 9.2 Package Standalone Directory:
+        - Verify all code inside `jobfit/` operates independently of any parent workspace.
+  [ ] 9.3 Git Initialization & Remote Push (Upon Explicit User Approval):
+        - Initialize git repository inside the standalone folder.
+        - Create clean initial commit with structured history.
+        - Connect to GitHub remote: `jobfit-local-ai`.
+  [ ] 9.4 Final Verification:
+        - Verify repository links, DEV.to post, and submission checklist compliance.
+
+Deliverables:
+  - Published public GitHub repository `jobfit-local-ai`.
+  - Live DEV.to contest entry.
+
+Gate Criteria:
+  - Clean clone & run verification from the public repository.
+
+
+==============================================================================
+IMMEDIATE NEXT ACTION
+==============================================================================
+Execute PHASE 0 (Repository & Environment Audit).
+Inspect the host runtime, verify Ollama/Gemma availability, and produce the
+formal Phase 0 Audit Report before writing application code.
