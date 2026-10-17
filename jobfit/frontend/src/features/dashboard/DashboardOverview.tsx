@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Briefcase,
   Clock,
@@ -9,9 +9,12 @@ import {
   Cpu,
   CheckCircle2,
   Layers,
+  ChevronRight,
 } from 'lucide-react';
-import type { AIHealth } from '../../lib/types';
+
+import type { AIHealth, ApplicationStats, AnalysisItem, ApplicationItem } from '../../lib/types';
 import type { NavTab } from '../../components/Sidebar';
+import { getApplicationStats, getAnalyses, getApplications } from '../../lib/api';
 
 interface DashboardOverviewProps {
   aiHealth: AIHealth | null;
@@ -23,6 +26,60 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   onNavigate,
 }) => {
   const isReady = aiHealth?.status === 'ready';
+
+  const [stats, setStats] = useState<ApplicationStats>({
+    total: 0,
+    saved: 0,
+    preparing: 0,
+    applied: 0,
+    interview: 0,
+    offer: 0,
+    rejected: 0,
+    withdrawn: 0,
+    recent_analyses_count: 0,
+  });
+
+  const [recentAnalyses, setRecentAnalyses] = useState<AnalysisItem[]>([]);
+  const [recentApps, setRecentApps] = useState<ApplicationItem[]>([]);
+
+  useEffect(() => {
+    async function loadDashboardData() {
+      try {
+        const [statsData, analysesData, appsData] = await Promise.all([
+          getApplicationStats().catch(() => null),
+          getAnalyses().catch(() => []),
+          getApplications().catch(() => []),
+        ]);
+
+        if (statsData) setStats(statsData);
+        if (analysesData) setRecentAnalyses(analysesData.slice(0, 3));
+        if (appsData) setRecentApps(appsData.slice(0, 4));
+      } catch (err) {
+        console.error('Failed to load dashboard metrics', err);
+      }
+    }
+    loadDashboardData();
+  }, []);
+
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'Offer':
+        return <span className="badge badge-offer">Offer</span>;
+      case 'Interview':
+        return <span className="badge badge-interview">Interview</span>;
+      case 'Applied':
+        return <span className="badge badge-applied">Applied</span>;
+      case 'Preparing':
+        return <span className="badge badge-preparing">Preparing</span>;
+      case 'Saved':
+        return <span className="badge badge-saved">Saved</span>;
+      case 'Rejected':
+        return <span className="badge badge-rejected">Rejected</span>;
+      default:
+        return <span className="badge">{status}</span>;
+    }
+  };
 
   return (
     <div>
@@ -56,7 +113,6 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             src="/hero.png"
             alt="JobFit 3D Workspace"
             onError={(e) => {
-              // fallback if asset not yet copied
               (e.target as HTMLElement).style.display = 'none';
             }}
           />
@@ -73,8 +129,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <Briefcase style={{ width: '18px', height: '18px' }} />
             </div>
           </div>
-          <div className="metric-value">0</div>
-          <div className="metric-subtext">Total applications recorded</div>
+          <div className="metric-value">{stats.total}</div>
+          <div className="metric-subtext">Total applications recorded in SQLite</div>
         </div>
 
         {/* Card 2: Lime */}
@@ -85,8 +141,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <Clock style={{ width: '18px', height: '18px' }} />
             </div>
           </div>
-          <div className="metric-value">0</div>
-          <div className="metric-subtext">In preparing & applied status</div>
+          <div className="metric-value">{stats.preparing + stats.applied}</div>
+          <div className="metric-subtext">{stats.preparing} preparing, {stats.applied} applied</div>
         </div>
 
         {/* Card 3: Pink */}
@@ -97,8 +153,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <Award style={{ width: '18px', height: '18px' }} />
             </div>
           </div>
-          <div className="metric-value">0</div>
-          <div className="metric-subtext">Upcoming interview rounds</div>
+          <div className="metric-value">{stats.interview}</div>
+          <div className="metric-subtext">{stats.offer} offer received</div>
         </div>
 
         {/* Card 4: Powder Blue */}
@@ -109,8 +165,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <Layers style={{ width: '18px', height: '18px' }} />
             </div>
           </div>
-          <div className="metric-value">0</div>
-          <div className="metric-subtext">Saved resume-to-job matches</div>
+          <div className="metric-value">{stats.recent_analyses_count}</div>
+          <div className="metric-subtext">Evidence-backed Gemma evaluations</div>
         </div>
       </div>
 
@@ -128,30 +184,74 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 </span>
               </div>
               <button
-                onClick={() => onNavigate('analyze')}
+                onClick={() => onNavigate(recentAnalyses.length > 0 ? 'saved' : 'analyze')}
                 className="btn btn-secondary btn-sm"
               >
-                <span>New Match</span>
+                <span>{recentAnalyses.length > 0 ? 'View All' : 'New Match'}</span>
                 <ArrowRight style={{ width: '14px', height: '14px' }} />
               </button>
             </div>
 
-            {/* Helpful Empty State for First-Time Users */}
-            <div className="empty-state-card">
-              <div className="empty-state-art">
-                <Sparkles style={{ width: '32px', height: '32px' }} />
+            {recentAnalyses.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {recentAnalyses.map((item) => (
+                  <div
+                    key={item.id}
+                    onClick={() => onNavigate('saved')}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '12px 16px',
+                      backgroundColor: 'var(--bg-canvas)',
+                      borderRadius: 'var(--radius-md)',
+                      border: '1px solid var(--border-color)',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    <div>
+                      <strong style={{ fontSize: '0.92rem', color: 'var(--text-primary)' }}>
+                        {item.role_title}
+                      </strong>
+                      <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                        {item.company} • {item.evidence_items.length} qualifications evaluated
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span
+                        style={{
+                          fontSize: '0.9rem',
+                          fontWeight: 700,
+                          fontFamily: 'var(--font-heading)',
+                          color: item.score >= 80 ? 'var(--pastel-offer-text)' : 'var(--text-primary)',
+                        }}
+                      >
+                        {item.score.toFixed(0)}%
+                      </span>
+                      <ChevronRight style={{ width: '15px', height: '15px', color: 'var(--text-muted)' }} />
+                    </div>
+                  </div>
+                ))}
               </div>
-              <h4>No Analyses Yet</h4>
-              <p>
-                Paste a target job description and match it against your resume to view evidenced skills, gaps, and tailoring advice.
-              </p>
-              <button
-                onClick={() => onNavigate('analyze')}
-                className="btn btn-lime btn-sm"
-              >
-                <span>Run First Analysis</span>
-              </button>
-            </div>
+            ) : (
+              /* Helpful Empty State for First-Time Users */
+              <div className="empty-state-card">
+                <div className="empty-state-art">
+                  <Sparkles style={{ width: '32px', height: '32px' }} />
+                </div>
+                <h4>No Analyses Yet</h4>
+                <p>
+                  Paste a target job description and match it against your resume to view evidenced skills, gaps, and tailoring advice.
+                </p>
+                <button
+                  onClick={() => onNavigate('analyze')}
+                  className="btn btn-lime btn-sm"
+                >
+                  <span>Run First Analysis</span>
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Application Pipeline Preview */}
@@ -171,24 +271,62 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               </button>
             </div>
 
-            <div className="empty-state-card" style={{ padding: '28px 16px' }}>
-              <div
-                className="empty-state-art"
-                style={{ backgroundColor: 'var(--pastel-blue)', color: 'var(--blue-dark)' }}
-              >
-                <Briefcase style={{ width: '28px', height: '28px' }} />
+            {recentApps.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {recentApps.map((app) => (
+                  <div
+                    key={app.id}
+                    onClick={() => onNavigate('applications')}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '12px 16px',
+                      backgroundColor: 'var(--bg-canvas)',
+                      borderRadius: 'var(--radius-md)',
+                      border: '1px solid var(--border-color)',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <div>
+                      <strong style={{ fontSize: '0.92rem', color: 'var(--text-primary)' }}>
+                        {app.role}
+                      </strong>
+                      <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                        {app.company} {app.applied_date ? `• ${app.applied_date}` : ''}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      {getStatusBadge(app.status)}
+                      {app.match_score !== null && app.match_score !== undefined && (
+                        <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                          {app.match_score.toFixed(0)}%
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
-              <h4>Pipeline Is Clear</h4>
-              <p>
-                Track status across Saved, Preparing, Applied, Interview, Offer, and Rejected.
-              </p>
-              <button
-                onClick={() => onNavigate('applications')}
-                className="btn btn-secondary btn-sm"
-              >
-                <span>Add First Application</span>
-              </button>
-            </div>
+            ) : (
+              <div className="empty-state-card" style={{ padding: '28px 16px' }}>
+                <div
+                  className="empty-state-art"
+                  style={{ backgroundColor: 'var(--pastel-blue)', color: 'var(--blue-dark)' }}
+                >
+                  <Briefcase style={{ width: '28px', height: '28px' }} />
+                </div>
+                <h4>Pipeline Is Clear</h4>
+                <p>
+                  Track status across Saved, Preparing, Applied, Interview, Offer, and Rejected.
+                </p>
+                <button
+                  onClick={() => onNavigate('applications')}
+                  className="btn btn-secondary btn-sm"
+                >
+                  <span>Add First Application</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
 

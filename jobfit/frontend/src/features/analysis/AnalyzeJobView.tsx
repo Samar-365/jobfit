@@ -14,6 +14,9 @@ import {
   XCircle,
   Edit3,
   Mail,
+  Download,
+  BookmarkPlus,
+  Check,
 } from 'lucide-react';
 import { getResumes, createAnalysis } from '../../lib/api';
 import type { ResumeItem, AnalysisItem, RequirementEvidence } from '../../lib/types';
@@ -23,7 +26,9 @@ interface AnalyzeJobViewProps {
   onNavigateToResume: () => void;
   onNavigateToTailor?: (context: { bullet?: string; context?: string }) => void;
   onNavigateToCoverLetter?: (context: { company?: string; role?: string }) => void;
+  onNavigateToApplications?: () => void;
 }
+
 
 const SAMPLE_JOB_DESCRIPTION = `Stripe — Senior Backend Engineer
 Requirements:
@@ -43,6 +48,7 @@ export const AnalyzeJobView: React.FC<AnalyzeJobViewProps> = ({
   onNavigateToResume,
   onNavigateToTailor,
   onNavigateToCoverLetter,
+  onNavigateToApplications,
 }) => {
   const [resumes, setResumes] = useState<ResumeItem[]>([]);
   const [selectedResumeId, setSelectedResumeId] = useState<string>('');
@@ -56,6 +62,65 @@ export const AnalyzeJobView: React.FC<AnalyzeJobViewProps> = ({
   const [currentStage, setCurrentStage] = useState('Extracting atomic qualifications via Gemma 2:2B...');
   const [analysisResult, setAnalysisResult] = useState<AnalysisItem | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isSavingApp, setIsSavingApp] = useState(false);
+  const [savedAppId, setSavedAppId] = useState<string | null>(null);
+
+  const handleSaveAsApplication = async () => {
+    if (!analysisResult) return;
+    setIsSavingApp(true);
+    try {
+      const res = await fetch('/api/applications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          company: analysisResult.company,
+          role: analysisResult.role_title,
+          analysis_id: analysisResult.id,
+          job_id: analysisResult.job_id,
+          resume_id: analysisResult.resume_id,
+          status: 'Preparing',
+          match_score: analysisResult.score,
+          notes: `Analyzed with local Gemma (Score: ${analysisResult.score.toFixed(0)}%). Must-have: ${analysisResult.must_have_score.toFixed(0)}%, Nice-to-have: ${analysisResult.nice_to_have_score.toFixed(0)}%.`,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setSavedAppId(data.id);
+      }
+    } catch (err) {
+      console.error('Failed to save application', err);
+    } finally {
+      setIsSavingApp(false);
+    }
+  };
+
+  const handleExportReportMarkdown = () => {
+    if (!analysisResult) return;
+    const md = `# JobFit Evidence Match Report: ${analysisResult.role_title} at ${analysisResult.company}\n\n`
+      + `**Deterministic Match Score:** ${analysisResult.score.toFixed(1)}%\n`
+      + `**Must-Have Score:** ${analysisResult.must_have_score.toFixed(1)}%\n`
+      + `**Nice-to-Have Score:** ${analysisResult.nice_to_have_score.toFixed(1)}%\n`
+      + `**Evaluated:** ${new Date().toLocaleDateString()}\n\n`
+      + `## Summary Analysis\n${analysisResult.summary}\n\n`
+      + `## Verified Requirements Evidence Matrix\n\n`
+      + analysisResult.evidence_items.map((e, idx) =>
+        `### ${idx + 1}. [${e.status}] ${e.requirement_text}\n`
+        + `- **Category:** ${e.category}\n`
+        + `- **Verbatim Resume Evidence:** ${e.resume_quote ? `"${e.resume_quote}"` : '*No direct text evidence identified in submitted resume*'}\n`
+        + `- **Model Reasoning:** ${e.reasoning}\n`
+        + (e.recommendation ? `- **Actionable Recommendation:** ${e.recommendation}\n` : '')
+      ).join('\n\n')
+      + `\n\n---\n*Disclaimer: ${analysisResult.disclaimer}*`;
+
+    const blob = new Blob([md], { type: 'text/markdown;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `JobFit_Match_${analysisResult.company.replace(/\s+/g, '_')}_${analysisResult.role_title.replace(/\s+/g, '_')}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
 
   // Results filtering
   const [filterTab, setFilterTab] = useState<'all' | 'exact' | 'partial' | 'not_mentioned'>('all');
@@ -425,7 +490,41 @@ export const AnalyzeJobView: React.FC<AnalyzeJobViewProps> = ({
                   <span>Draft Cover Letter</span>
                 </button>
               )}
+
+              {/* Save as Application Button */}
+              {savedAppId ? (
+                <button
+                  onClick={() => onNavigateToApplications && onNavigateToApplications()}
+                  className="btn btn-secondary btn-sm"
+                  style={{ color: 'var(--pastel-offer-text)', fontWeight: 600 }}
+                  title="View in Application Tracker"
+                >
+                  <Check style={{ width: '13px', height: '13px', color: 'var(--pastel-offer-text)' }} />
+                  <span>Saved in Tracker</span>
+                </button>
+              ) : (
+                <button
+                  onClick={handleSaveAsApplication}
+                  disabled={isSavingApp}
+                  className="btn btn-lime btn-sm"
+                  title="Track this job in Applications Pipeline"
+                >
+                  <BookmarkPlus style={{ width: '13px', height: '13px' }} />
+                  <span>{isSavingApp ? 'Saving...' : 'Save as Application'}</span>
+                </button>
+              )}
+
+              {/* Export Markdown Report Button */}
+              <button
+                onClick={handleExportReportMarkdown}
+                className="btn btn-secondary btn-sm"
+                title="Download complete evidence analysis report as Markdown"
+              >
+                <Download style={{ width: '13px', height: '13px' }} />
+                <span>Export Report (.md)</span>
+              </button>
             </div>
+
 
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               <span className="badge badge-offer">

@@ -20,6 +20,13 @@ from app.schemas.analysis import (
     AnalysisCreate,
     AnalysisResponse,
 )
+from app.schemas.application import (
+    ApplicationStatus,
+    ApplicationCreate,
+    ApplicationUpdate,
+    ApplicationResponse,
+    ApplicationStats,
+)
 
 __all__ = [
     "HealthResponse",
@@ -38,4 +45,10 @@ __all__ = [
     "RequirementEvidence",
     "AnalysisCreate",
     "AnalysisResponse",
+    "ApplicationStatus",
+    "ApplicationCreate",
+    "ApplicationUpdate",
+    "ApplicationResponse",
+    "ApplicationStats",
 ]
+

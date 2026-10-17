@@ -151,8 +151,10 @@ export function App() {
             onNavigateToResume={() => setActiveTab('resume')}
             onNavigateToTailor={handleNavigateToTailor}
             onNavigateToCoverLetter={handleNavigateToCoverLetter}
+            onNavigateToApplications={() => setActiveTab('applications')}
           />
         )}
+
 
         {activeTab === 'resume' && (
           <ResumeView onBack={() => setActiveTab('overview')} />

@@ -280,23 +280,24 @@ PHASE 5: APPLICATION TRACKER & DASHBOARD INTEGRATION
 Goal: Provide persistent, organized job application management connected to analyses.
 
 Tasks:
-  [ ] 5.1 Application Tracker Data Model & CRUD:
+  [x] 5.1 Application Tracker Data Model & CRUD:
         - SQLite schema for `applications` table:
           id, company, role, job_description_id, resume_id, analysis_id,
           status, applied_date, salary_range, notes, created_at, updated_at.
         - Supported statuses: `Saved`, `Preparing`, `Applied`, `Interview`, `Offer`, `Rejected`, `Withdrawn`.
         - Endpoints: `GET /api/applications`, `POST /api/applications`,
                      `PATCH /api/applications/{id}`, `DELETE /api/applications/{id}`.
-  [ ] 5.2 Application Tracker UI:
+  [x] 5.2 Application Tracker UI:
         - Filterable table / Kanban-style view.
         - Quick modal to log an application directly from a completed Analysis screen.
         - Inline status switcher and notes editor.
-  [ ] 5.3 Export Capabilities:
+  [x] 5.3 Export Capabilities:
         - CSV export for application records.
         - Markdown/Text export for cover letters and analysis reports.
-  [ ] 5.4 Dashboard Integration:
+  [x] 5.4 Dashboard Integration:
         - Live aggregation of application status counts directly from SQLite.
         - Timeline of recent analyses and upcoming interview dates.
+
 
 Deliverables:
   - Full-featured local application tracking system.
