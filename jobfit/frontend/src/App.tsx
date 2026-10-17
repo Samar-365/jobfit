@@ -8,6 +8,8 @@ import { ResumeView } from './features/resume/ResumeView';
 import { ApplicationsView } from './features/applications/ApplicationsView';
 import { SavedAnalysesView } from './features/analysis/SavedAnalysesView';
 import { SettingsView } from './features/settings/SettingsView';
+import { TailoringView } from './features/tailoring/TailoringView';
+import { CoverLetterView } from './features/cover_letter/CoverLetterView';
 import { getAIHealth } from './lib/api';
 import type { AIHealth } from './lib/types';
 import { Menu } from 'lucide-react';
@@ -17,6 +19,20 @@ export function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [aiHealth, setAiHealth] = useState<AIHealth | null>(null);
   const [loadingAi, setLoadingAi] = useState<boolean>(true);
+
+  // Pre-filled context when navigating from analysis
+  const [tailorContext, setTailorContext] = useState<{ bullet?: string; context?: string }>({});
+  const [coverLetterContext, setCoverLetterContext] = useState<{ company?: string; role?: string }>({});
+
+  const handleNavigateToTailor = (context: { bullet?: string; context?: string }) => {
+    setTailorContext(context);
+    setActiveTab('tailor');
+  };
+
+  const handleNavigateToCoverLetter = (context: { company?: string; role?: string }) => {
+    setCoverLetterContext(context);
+    setActiveTab('cover_letter');
+  };
 
   const fetchHealth = useCallback(async () => {
     setLoadingAi(true);
@@ -59,6 +75,16 @@ export function App() {
         return {
           title: 'My Resume & Skills',
           subtitle: 'Manage local career documents and structured competencies.',
+        };
+      case 'tailor':
+        return {
+          title: 'Truthful Resume Tailoring',
+          subtitle: 'Rephrase bullets to align with target jobs without fabricating achievements.',
+        };
+      case 'cover_letter':
+        return {
+          title: 'Grounded Cover Letter Drafter',
+          subtitle: 'Generate honest cover letters with strict bracketed placeholders for personal motivation.',
         };
       case 'applications':
         return {
@@ -123,11 +149,27 @@ export function App() {
           <AnalyzeJobView
             onBack={() => setActiveTab('overview')}
             onNavigateToResume={() => setActiveTab('resume')}
+            onNavigateToTailor={handleNavigateToTailor}
+            onNavigateToCoverLetter={handleNavigateToCoverLetter}
           />
         )}
 
         {activeTab === 'resume' && (
           <ResumeView onBack={() => setActiveTab('overview')} />
+        )}
+
+        {activeTab === 'tailor' && (
+          <TailoringView
+            initialBullet={tailorContext.bullet}
+            initialContext={tailorContext.context}
+          />
+        )}
+
+        {activeTab === 'cover_letter' && (
+          <CoverLetterView
+            initialCompany={coverLetterContext.company}
+            initialRole={coverLetterContext.role}
+          />
         )}
 
         {activeTab === 'applications' && <ApplicationsView />}

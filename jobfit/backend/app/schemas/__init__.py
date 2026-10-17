@@ -9,6 +9,17 @@ from app.schemas.resume import (
     EducationItem,
     CertificationItem,
 )
+from app.schemas.job import (
+    JobRequirementItem,
+    JobCreate,
+    JobResponse,
+)
+from app.schemas.analysis import (
+    MatchStatus,
+    RequirementEvidence,
+    AnalysisCreate,
+    AnalysisResponse,
+)
 
 __all__ = [
     "HealthResponse",
@@ -20,4 +31,11 @@ __all__ = [
     "ProjectItem",
     "EducationItem",
     "CertificationItem",
+    "JobRequirementItem",
+    "JobCreate",
+    "JobResponse",
+    "MatchStatus",
+    "RequirementEvidence",
+    "AnalysisCreate",
+    "AnalysisResponse",
 ]

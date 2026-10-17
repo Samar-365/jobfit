@@ -1,4 +1,7 @@
 """Database Models Package."""
 from app.models.resume import Resume
+from app.models.job import JobDescription
+from app.models.analysis import Analysis
+from app.models.cover_letter import CoverLetter
 
-__all__ = ["Resume"]
+__all__ = ["Resume", "JobDescription", "Analysis", "CoverLetter"]

@@ -213,10 +213,10 @@ PHASE 3: EVIDENCE-BACKED JOB MATCHING & SKILL GAP ANALYSIS
 Goal: Implement the core differentiating capability: explainable matching with cited evidence.
 
 Tasks:
-  [ ] 3.1 Job Description Ingestion:
+  [x] 3.1 Job Description Ingestion:
         - Endpoint: `POST /api/jobs` (paste text, company, role title).
         - Structured requirement extraction (Must-Have vs. Nice-to-Have qualifications).
-  [ ] 3.2 Evidence Matching Engine (`matcher.py`):
+  [x] 3.2 Evidence Matching Engine (`matcher.py`):
         - Prompt Gemma to evaluate each job requirement against parsed resume data.
         - For each requirement, classify status:
           * `EXACT_MATCH`: Explicit resume evidence found (quote exact snippet).
@@ -224,12 +224,12 @@ Tasks:
           * `NOT_MENTIONED`: No evidence present in the submitted document.
           * `UNASSESSABLE`: Cannot be determined from the document.
         - Strict constraint: Missing evidence must NEVER be reported as "user lacks this skill".
-  [ ] 3.3 Deterministic Scoring Engine (`scoring_engine.py`):
+  [x] 3.3 Deterministic Scoring Engine (`scoring_engine.py`):
         - Transparent mathematical formula based on verified requirements ratio:
           Score = (Weighted Matched Requirements / Total Requirements) * 100.
         - Zero black-box hallucinated scoring.
         - Explicit UI disclaimers: "Estimated match based on supplied text. Not an ATS guarantee."
-  [ ] 3.4 API & UI Integration:
+  [x] 3.4 API & UI Integration:
         - Endpoint: `POST /api/analyses` and `GET /api/analyses/{id}`.
         - UI: Match Summary Card with component score breakdowns.
         - UI: Evidence Matrix displaying each requirement alongside verbatim resume quotes.
@@ -248,23 +248,23 @@ PHASE 4: GROUNDED RESUME TAILORING & COVER LETTER DRAFTER
 Goal: Empower users to improve resume wording and generate cover letters without fabricating claims.
 
 Tasks:
-  [ ] 4.1 Truthful Resume Tailoring Engine (`tailoring.py`):
+  [x] 4.1 Truthful Resume Tailoring Engine (`tailoring.py`):
         - Select specific bullet point from parsed resume.
         - Provide relevant target job requirements to Gemma.
         - Guardrail prompt:
           * Align terminology and action verbs to the job description.
           * STRICTLY FORBID inventing achievements, metrics, companies, or degrees.
           * If a metric is missing, retain the original factual core.
-  [ ] 4.2 Side-by-Side Tailoring UI:
+  [x] 4.2 Side-by-Side Tailoring UI:
         - Diff view showing Original text vs. Suggested text.
         - One-click "Accept", "Edit Manually", or "Reject" actions.
         - Copy revised bullet to clipboard.
-  [ ] 4.3 Context-Grounded Cover Letter Generator (`cover_letter.py`):
+  [x] 4.3 Context-Grounded Cover Letter Generator (`cover_letter.py`):
         - Prompt utilizing user resume, target job description, and optional user motivation notes.
         - Strict placeholder policy: When key details are unstated, output explicit tokens
           such as `[Specific reason why you admire Company X]` rather than making up stories.
         - In-browser markdown editor for instant customization.
-  [ ] 4.4 Tests:
+  [x] 4.4 Tests:
         - Adversarial test cases confirming the model rejects prompts asking to fabricate degrees.
 
 Deliverables:
@@ -421,6 +421,6 @@ Gate Criteria:
 ==============================================================================
 IMMEDIATE NEXT ACTION
 ==============================================================================
-Execute PHASE 3 (Evidence-Backed Job Matching & Skill Gap Analysis).
-Implement job description ingestion (POST /api/jobs), evidence matching engine
-(matcher.py), deterministic scoring engine (scoring_engine.py), and matching UI.
+Execute PHASE 4 (Grounded Resume Tailoring & Cover Letter Drafter).
+Implement guarded bullet point rephraser (tailoring.py), context-grounded cover
+letter generator (cover_letter.py), and side-by-side diff UI.

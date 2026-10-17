@@ -7,6 +7,8 @@ import {
   History,
   Settings,
   ShieldCheck,
+  Edit3,
+  Mail,
   X,
 } from 'lucide-react';
 
@@ -14,6 +16,8 @@ export type NavTab =
   | 'overview'
   | 'analyze'
   | 'resume'
+  | 'tailor'
+  | 'cover_letter'
   | 'applications'
   | 'saved'
   | 'settings';
@@ -35,6 +39,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
     { id: 'analyze', label: 'Analyze Job', icon: Sparkles },
     { id: 'resume', label: 'My Resume', icon: FileText },
+    { id: 'tailor', label: 'Tailor Bullets', icon: Edit3 },
+    { id: 'cover_letter', label: 'Cover Letter', icon: Mail },
     { id: 'applications', label: 'Applications', icon: Briefcase },
     { id: 'saved', label: 'Saved Analyses', icon: History },
     { id: 'settings', label: 'Settings', icon: Settings },
