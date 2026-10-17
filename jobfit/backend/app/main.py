@@ -6,7 +6,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.db import init_db
 from app.models import Resume, JobDescription, Analysis, CoverLetter, Application  # Ensure SQLAlchemy registers tables
-from app.api import health, resumes, jobs, analyses, tailoring, cover_letters, applications
+from app.api import health, resumes, jobs, analyses, tailoring, cover_letters, applications, settings as settings_api
+
 
 
 
@@ -43,6 +44,8 @@ app.include_router(analyses.router, prefix="/api")
 app.include_router(tailoring.router, prefix="/api")
 app.include_router(cover_letters.router, prefix="/api")
 app.include_router(applications.router, prefix="/api")
+app.include_router(settings_api.router, prefix="/api")
+
 
 
 

@@ -19,6 +19,29 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 }) => {
   const [selectedModel, setSelectedModel] = useState(aiHealth?.target_model || 'gemma2:2b');
   const [ollamaUrl, setOllamaUrl] = useState(aiHealth?.ollama_url || 'http://localhost:11434');
+  const [isPurging, setIsPurging] = useState(false);
+  const [purgeFeedback, setPurgeFeedback] = useState<string | null>(null);
+
+  const handlePurgeData = async () => {
+    if (!window.confirm('CRITICAL ACTION: Are you sure you want to permanently purge all local resumes, job analyses, and application logs? This cannot be undone.')) {
+      return;
+    }
+    setIsPurging(true);
+    setPurgeFeedback(null);
+    try {
+      const res = await fetch('/api/settings/purge-data', { method: 'POST' });
+      if (res.ok) {
+        setPurgeFeedback('All local data and uploaded files have been permanently wiped.');
+      } else {
+        setPurgeFeedback('Failed to purge data. Please check backend server.');
+      }
+    } catch (err) {
+      setPurgeFeedback('Error communicating with backend server.');
+    } finally {
+      setIsPurging(false);
+    }
+  };
+
 
   return (
     <div style={{ maxWidth: '900px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -130,30 +153,46 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             borderRadius: 'var(--radius-md)',
             border: '1px solid #FED7D7',
             display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
+            flexDirection: 'column',
+            gap: '12px',
           }}
         >
-          <div>
-            <strong style={{ fontSize: '0.92rem', color: '#C53030' }}>Purge Local Data</strong>
-            <p style={{ fontSize: '0.82rem', color: '#742A2A', marginTop: '2px' }}>
-              Permanently wipe all stored resumes, application records, and match logs.
-            </p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <strong style={{ fontSize: '0.92rem', color: '#C53030' }}>Purge Local Data</strong>
+              <p style={{ fontSize: '0.82rem', color: '#742A2A', marginTop: '2px' }}>
+                Permanently wipe all stored resumes, application records, and match logs from your workstation.
+              </p>
+            </div>
+            <button
+              onClick={handlePurgeData}
+              disabled={isPurging}
+              className="btn btn-secondary btn-sm"
+              style={{ color: '#C53030', borderColor: '#FEB2B2', whiteSpace: 'nowrap' }}
+            >
+              <Trash2 style={{ width: '14px', height: '14px' }} />
+              <span>{isPurging ? 'Purging...' : 'Purge Data'}</span>
+            </button>
           </div>
-          <button
-            onClick={() => {
-              if (confirm('Are you sure you want to purge all local application data?')) {
-                alert('Local data wiped.');
-              }
-            }}
-            className="btn btn-secondary btn-sm"
-            style={{ color: '#C53030', borderColor: '#FEB2B2' }}
-          >
-            <Trash2 style={{ width: '14px', height: '14px' }} />
-            <span>Purge Data</span>
-          </button>
+
+          {purgeFeedback && (
+            <div
+              style={{
+                fontSize: '0.82rem',
+                padding: '8px 12px',
+                borderRadius: 'var(--radius-sm)',
+                backgroundColor: 'white',
+                color: purgeFeedback.includes('permanently') ? '#22543D' : '#C53030',
+                border: '1px solid var(--border-color)',
+                fontWeight: 600,
+              }}
+            >
+              {purgeFeedback}
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
 };
+

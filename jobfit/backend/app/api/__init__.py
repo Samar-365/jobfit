@@ -6,6 +6,7 @@ from app.api.analyses import router as analyses_router
 from app.api.tailoring import router as tailoring_router
 from app.api.cover_letters import router as cover_letters_router
 from app.api.applications import router as applications_router
+from app.api.settings import router as settings_router
 
 __all__ = [
     "health_router",
@@ -15,5 +16,7 @@ __all__ = [
     "tailoring_router",
     "cover_letters_router",
     "applications_router",
+    "settings_router",
 ]
+
 

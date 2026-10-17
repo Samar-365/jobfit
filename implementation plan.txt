@@ -312,20 +312,21 @@ PHASE 6: SYSTEM HARDENING, PRIVACY SAFEGUARDS & UI POLISH
 Goal: Ensure production-grade reliability, security boundaries, and responsive aesthetics.
 
 Tasks:
-  [ ] 6.1 Security & Prompt Injection Audit:
+  [x] 6.1 Security & Prompt Injection Audit:
         - Wrap all untrusted resume and job text in strict XML/markdown boundary tokens.
         - Verify protection against prompt injection attempts designed to force high scores.
         - Path traversal tests on resume upload endpoints.
-  [ ] 6.2 Privacy & Local Data Sanitization:
+  [x] 6.2 Privacy & Local Data Sanitization:
         - Audit logs to guarantee that no candidate names, contact details, or resumes are logged.
         - Comprehensive "Delete Data" action: wipes SQLite records and deletes uploaded files.
-  [ ] 6.3 UI Polish & Accessibility:
+  [x] 6.3 UI Polish & Accessibility:
         - Ensure responsive layout across standard laptops and mobile screens.
         - Keyboard accessibility and ARIA labels on all modal triggers.
         - Micro-interactions: hover transitions, animated score progress, smooth accordion toggles.
-  [ ] 6.4 Comprehensive Test Suite:
+  [x] 6.4 Comprehensive Test Suite:
         - Run `pytest` across all backend endpoints and edge cases.
         - Frontend type check (`tsc --noEmit`) and build test (`npm run build`).
+
 
 Deliverables:
   - Fully tested, secure, and privacy-hardened application.
