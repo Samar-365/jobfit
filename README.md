@@ -1,12 +1,5 @@
 # JobFit — Local-First AI Job Application Assistant
 
-[![Gemma 2:2B](https://img.shields.io/badge/Powered%20By-Google%20Gemma%202%3A2B-4285F4?logo=google&logoColor=white)](https://ai.google.dev/gemma)
-[![100% Offline](https://img.shields.io/badge/Privacy-100%25%20Local%20Inference-2ea44f?logo=shield&logoColor=white)](#privacy-guarantees)
-[![Hacktoberfest 2026](https://img.shields.io/badge/Hacktoberfest%202026-Week%202%20Side%20Hustle-FF7518?logo=hacktoberfest&logoColor=white)](https://hacktoberfest.com/)
-[![FastAPI](https://img.shields.io/badge/Backend-FastAPI%20%7C%20Python%203.11-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
-[![React + Vite](https://img.shields.io/badge/Frontend-React%2018%20%7C%20Vite%20%7C%20TypeScript-61DAFB?logo=react&logoColor=black)](https://vitejs.dev/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
 > **JobFit** is an ethical, local-first AI career application copilot designed to empower candidates with **verifiable, evidence-backed job matching**, **grounded resume bullet tailoring**, and **truthful cover letter drafting** — operating with **zero cloud dependencies** and **zero external data transmission**.
 
 ---
@@ -23,12 +16,12 @@
 
 JobFit solves these problems by running **Google's Gemma 2:2B** completely on your local workstation via Ollama:
 
-- 🔒 **100% Offline & Local Sovereignty**: All resume text parsing, requirement extraction, bullet tailoring, and cover letters execute on `localhost`. 0 bytes leave your machine.
-- 🔍 **Verifiable Evidence Citations**: Every positive requirement match cites exact, verbatim sentences from your submitted resume.
-- 📐 **Deterministic Scoring Engine**: A transparent mathematical formula ($Score = \frac{\text{Weighted Matches}}{\text{Total Requirements}} \times 100$) replaces opaque ATS claims.
-- 🛡️ **Anti-Fabrication Guardrails**: Our tailoring engine programmatically inspects rewritten bullets to verify that no metrics, degrees, or employers have been invented.
-- 📋 **Integrated Application Pipeline**: Track application states (`Saved`, `Preparing`, `Applied`, `Interview`, `Offer`, `Rejected`), export to CSV, and export evidence reports to Markdown.
-- 🧹 **One-Click Local Data Purge**: Completely wipe all SQLite records and local uploaded files from the UI at any time.
+- **100% Offline & Local Sovereignty**: All resume text parsing, requirement extraction, bullet tailoring, and cover letters execute on `localhost`. 0 bytes leave your machine.
+- **Verifiable Evidence Citations**: Every positive requirement match cites exact, verbatim sentences from your submitted resume.
+- **Deterministic Scoring Engine**: A transparent mathematical formula ($Score = \frac{\text{Weighted Matches}}{\text{Total Requirements}} \times 100$) replaces opaque ATS claims.
+- **Anti-Fabrication Guardrails**: Our tailoring engine programmatically inspects rewritten bullets to verify that no metrics, degrees, or employers have been invented.
+- **Integrated Application Pipeline**: Track application states (`Saved`, `Preparing`, `Applied`, `Interview`, `Offer`, `Rejected`), export to CSV, and export evidence reports to Markdown.
+- **One-Click Local Data Purge**: Completely wipe all SQLite records and local uploaded files from the UI at any time.
 
 ---
 
@@ -184,4 +177,4 @@ npm run build
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE). Built with ❤️ for Hacktoberfest 2026.
+This project is licensed under the [MIT License](LICENSE).
