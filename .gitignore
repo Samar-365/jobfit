@@ -55,5 +55,7 @@ yarn-error.log*
 Thumbs.db
 .idea/
 .vscode/
-*.swp
-*.swo
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/

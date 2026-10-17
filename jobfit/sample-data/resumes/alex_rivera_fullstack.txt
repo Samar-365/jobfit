@@ -1,0 +1,37 @@
+Alex Rivera
+alex.rivera@example.com | (415) 555-0142 | San Francisco, CA | linkedin.com/in/alexrivera-dev | github.com/alexrivera
+
+PROFESSIONAL SUMMARY
+Fullstack Software Engineer with 5+ years of experience architecting resilient microservices in Python (FastAPI, SQLAlchemy) and developing dynamic, accessible user interfaces with React and TypeScript. Proven track record in reducing page load latencies by 35% and mentoring junior team members.
+
+TECHNICAL SKILLS
+- Programming Languages: Python, TypeScript, JavaScript, SQL, HTML5, CSS3
+- Frameworks & Libraries: FastAPI, React, Next.js, Node.js, SQLAlchemy, Tailwind CSS
+- Cloud & Infrastructure: Docker, Kubernetes, AWS (S3, ECS), PostgreSQL, Redis, CI/CD (GitHub Actions)
+- Testing & Tools: Pytest, Vitest, Git, Postman, Linux
+
+WORK EXPERIENCE
+
+TechCorp Inc. — San Francisco, CA
+Senior Fullstack Engineer | June 2022 — Present
+- Led front-end architecture modernization using React 18 and TypeScript, reducing bundle size by 35% and improving Lighthouse performance score from 68 to 94.
+- Engineered high-throughput REST microservices with FastAPI and PostgreSQL handling 12,000 requests per minute with sub-50ms p95 response time.
+- Implemented asynchronous background task queues using Redis and Celery for distributed document processing.
+- Mentored 4 junior engineers on clean architecture, unit testing, and code review standards.
+
+DataStream Labs — Austin, TX
+Software Engineer | August 2020 — May 2022
+- Designed normalized PostgreSQL schemas and implemented partition indexing for 20M time-series records.
+- Automated CI/CD deployment pipelines using GitHub Actions and Docker, cutting deployment cycles by 50%.
+- Integrated third-party OAuth2 and Stripe billing APIs with automated retry mechanisms.
+
+EDUCATION
+University of California, Berkeley
+Bachelor of Science in Computer Science | Graduated May 2020 | GPA: 3.8 / 4.0
+
+PROJECTS
+- JobFit: Local-first career assistant leveraging Gemma open-weight models for private resume matching.
+- CloudMetrics: Lightweight Prometheus metric aggregator built with Python and React.
+
+CERTIFICATIONS
+- AWS Certified Developer — Associate (2023)

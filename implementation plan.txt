@@ -181,22 +181,22 @@ PHASE 2: LOCAL GEMMA INTEGRATION & MULTI-FORMAT RESUME PARSING
 Goal: Ingest PDF, DOCX, and TXT resumes, extract raw text, and parse into structured schemas.
 
 Tasks:
-  [ ] 2.1 File Ingestion Service (`file_parser.py`):
+  [x] 2.1 File Ingestion Service (`file_parser.py`):
         - Implement robust text extraction for PDF (`pypdf` / `pdfplumber`), DOCX (`docx`), TXT.
         - File-size validation (max 5MB) and MIME-type integrity checks.
         - Sanitized storage using UUID-based local filenames (preventing path traversal).
-  [ ] 2.2 Local Ollama Client (`ollama_client.py`):
+  [x] 2.2 Local Ollama Client (`ollama_client.py`):
         - Asynchronous HTTP client targeting `http://localhost:11434/api/generate`.
         - Configurable timeout (default: 45s) and graceful error handling.
-  [ ] 2.3 Structured Resume Parser (`parser.py`):
+  [x] 2.3 Structured Resume Parser (`parser.py`):
         - Gemma prompt template with anti-injection barriers.
         - Target schema: Name, Summary, Skills (Technical & Soft), Experience, Projects, Education.
         - Strict Pydantic parsing with repair retry loop if output JSON is malformed.
-  [ ] 2.4 API & UI Implementation:
+  [x] 2.4 API & UI Implementation:
         - Endpoints: `POST /api/resumes`, `GET /api/resumes`, `DELETE /api/resumes/{id}`.
         - UI: Drag-and-drop file upload, extraction progress indicator.
         - UI: Structured Resume Viewer allowing the user to review and manually edit parsed fields.
-  [ ] 2.5 Tests:
+  [x] 2.5 Tests:
         - Unit tests for PDF, DOCX, and TXT parsers.
         - Mocked inference tests verifying fallback on malformed JSON or Ollama disconnect.
 
@@ -421,6 +421,6 @@ Gate Criteria:
 ==============================================================================
 IMMEDIATE NEXT ACTION
 ==============================================================================
-Execute PHASE 0 (Repository & Environment Audit).
-Inspect the host runtime, verify Ollama/Gemma availability, and produce the
-formal Phase 0 Audit Report before writing application code.
+Execute PHASE 3 (Evidence-Backed Job Matching & Skill Gap Analysis).
+Implement job description ingestion (POST /api/jobs), evidence matching engine
+(matcher.py), deterministic scoring engine (scoring_engine.py), and matching UI.

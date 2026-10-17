@@ -5,7 +5,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.db import init_db
-from app.api import health
+from app.models import Resume  # Ensure SQLAlchemy registers tables
+from app.api import health, resumes
 
 
 @asynccontextmanager
@@ -35,6 +36,7 @@ app.add_middleware(
 
 # Include API Routers
 app.include_router(health.router, prefix="/api")
+app.include_router(resumes.router, prefix="/api")
 
 
 @app.get("/")

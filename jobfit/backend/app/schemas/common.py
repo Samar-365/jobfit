@@ -5,9 +5,9 @@ from pydantic import BaseModel, Field
 
 
 class HealthResponse(BaseModel):
-    status: str = Field(..., example="healthy")
-    app_name: str = Field(..., example="JobFit")
-    version: str = Field(..., example="0.1.0")
+    status: str = Field(..., json_schema_extra={"example": "healthy"})
+    app_name: str = Field(..., json_schema_extra={"example": "JobFit"})
+    version: str = Field(..., json_schema_extra={"example": "0.1.0"})
     timestamp: datetime = Field(default_factory=datetime.utcnow)
 
 
