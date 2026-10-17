@@ -1,0 +1,45 @@
+{
+  "id": "bench-2",
+  "archetype": "Mid-level Fullstack Dev applying for Senior Backend Role",
+  "resume": {
+    "name": "Jordan Taylor",
+    "title": "Fullstack Software Engineer",
+    "email": "jordan.taylor@example.com",
+    "summary": "Fullstack engineer with 4 years building customer-facing web applications and REST APIs using Node.js, Python, PostgreSQL, and Docker.",
+    "technical_skills": ["Python", "Node.js", "TypeScript", "PostgreSQL", "Docker", "REST APIs", "Redis", "AWS EC2"],
+    "soft_skills": ["Agile Collaboration", "Technical Writing"],
+    "experience": [
+      {
+        "company": "CloudFlow SaaS",
+        "role": "Software Engineer",
+        "period": "2022 - 2026",
+        "location": "Austin, TX",
+        "bullets": [
+          "Engineered backend REST endpoints in Python FastAPI and Node.js serving 45,000 daily active users.",
+          "Optimized slow PostgreSQL queries by introducing composite indices, reducing p95 latency by 32%.",
+          "Containerized application services with Docker Compose to streamline developer onboarding."
+        ]
+      }
+    ],
+    "projects": [],
+    "education": [
+      {
+        "institution": "University of Texas at Austin",
+        "degree": "B.S.",
+        "field_of_study": "Software Engineering",
+        "graduation_year": "2022"
+      }
+    ],
+    "certifications": [
+      {
+        "name": "AWS Certified Cloud Practitioner",
+        "year": "2023"
+      }
+    ]
+  },
+  "job": {
+    "company": "Apex Financial",
+    "role_title": "Senior Distributed Backend Engineer",
+    "raw_text": "Apex Financial is seeking a Senior Backend Engineer. Mandatory Requirements: 1. 5+ years professional experience developing distributed backend systems. 2. Production experience in Python or Go handling high concurrency. 3. Deep expertise in PostgreSQL query optimization and transaction isolation levels. 4. Hands-on experience with Kafka or distributed message streaming. 5. Production on-call rotation experience supporting 99.99% SLA services. Nice to have: Kubernetes cluster administration, financial ledger experience."
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "id": "bench-4",
+  "archetype": "Resume with severe gaps / completely mismatched skills",
+  "resume": {
+    "name": "Taylor Vance",
+    "title": "Print & Graphic Designer",
+    "email": "taylor.vance@example.com",
+    "summary": "Creative print production specialist with 6 years experience designing editorial magazine layouts, packaging, typography, and trade show collateral.",
+    "technical_skills": ["Adobe InDesign", "Adobe Illustrator", "Photoshop", "Typography", "CMYK Prepress", "Packaging Design"],
+    "soft_skills": ["Creative Direction", "Color Theory", "Print Vendor Coordination"],
+    "experience": [
+      {
+        "company": "Vogue Print House",
+        "role": "Senior Layout Designer",
+        "period": "2020 - 2026",
+        "location": "Chicago, IL",
+        "bullets": [
+          "Designed 48-page quarterly trade publications adhering to strict Pantone brand specifications.",
+          "Supervised digital press preflight checks to guarantee zero registration errors during large-run offset printing.",
+          "Collaborated with copywriters and photographers to curate aesthetic visual spreads."
+        ]
+      }
+    ],
+    "projects": [],
+    "education": [
+      {
+        "institution": "School of the Art Institute of Chicago",
+        "degree": "B.F.A.",
+        "field_of_study": "Visual Communication",
+        "graduation_year": "2020"
+      }
+    ],
+    "certifications": []
+  },
+  "job": {
+    "company": "RoboSystems Defense",
+    "role_title": "Embedded Firmware Engineer (C/C++)",
+    "raw_text": "RoboSystems is hiring an Embedded Firmware Engineer. Mandatory Requirements: 1. Deep proficiency in bare-metal C and modern C++ for ARM Cortex-M microcontrollers. 2. Experience with hardware communication protocols including SPI, I2C, CAN bus, and UART. 3. Hands-on debugging using digital oscilloscopes, logic analyzers, and JTAG probes. 4. Familiarity with Real-Time Operating Systems (FreeRTOS, Zephyr). 5. Knowledge of low-power sleep modes and battery power budget constraints."
+  }
+}

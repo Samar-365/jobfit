@@ -1,0 +1,48 @@
+{
+  "id": "bench-1",
+  "archetype": "College Graduate applying for Junior Frontend Dev",
+  "resume": {
+    "name": "Alex Chen",
+    "title": "Junior Frontend Developer",
+    "email": "alex.chen@example.edu",
+    "summary": "Recent Computer Science graduate with hands-on experience building accessible, responsive web applications in TypeScript and React. Creator of open-source UI component library.",
+    "technical_skills": ["JavaScript", "TypeScript", "React", "HTML5", "CSS3", "Git", "Vitest", "Tailwind CSS"],
+    "soft_skills": ["Problem Solving", "Teamwork", "Continuous Learning"],
+    "experience": [
+      {
+        "company": "Campus Tech Lab",
+        "role": "Frontend Intern",
+        "period": "Summer 2025",
+        "location": "Boston, MA",
+        "bullets": [
+          "Developed reusable React components adhering to WCAG 2.1 AA accessibility guidelines.",
+          "Implemented automated unit tests using Vitest, achieving 88% component test coverage.",
+          "Collaborated with 4 student engineers using Git feature branches and pull request reviews."
+        ]
+      }
+    ],
+    "projects": [
+      {
+        "title": "WeatherVue SPA",
+        "description": "Responsive weather dashboard built with React 18, TypeScript, and open weather API.",
+        "technologies": ["React", "TypeScript", "CSS3", "Vite"],
+        "link": "https://github.com/alexchen/weathervue"
+      }
+    ],
+    "education": [
+      {
+        "institution": "Boston University",
+        "degree": "B.S.",
+        "field_of_study": "Computer Science",
+        "graduation_year": "2026",
+        "gpa": "3.8/4.0"
+      }
+    ],
+    "certifications": []
+  },
+  "job": {
+    "company": "Acme Tech",
+    "role_title": "Junior Frontend Developer",
+    "raw_text": "Acme Tech is hiring a Junior Frontend Developer. Requirements: 1. Proficiency in React and modern TypeScript. 2. Strong foundation in responsive CSS and semantic HTML. 3. Familiarity with Git version control and collaborative code reviews. 4. Experience writing unit tests for web components. Preferred: Experience with Next.js or server-side rendering."
+  }
+}

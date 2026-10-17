@@ -1,0 +1,52 @@
+{
+  "id": "bench-3",
+  "archetype": "Marketing Specialist transitioning to Product Manager (Career Switcher)",
+  "resume": {
+    "name": "Morgan Lee",
+    "title": "Growth Marketing Manager",
+    "email": "morgan.lee@example.com",
+    "summary": "Data-driven marketing specialist with 5 years leading cross-functional growth initiatives, user feedback loops, and conversion funnel optimization. Transitioning into product management.",
+    "technical_skills": ["SQL", "Google Analytics", "Mixpanel", "A/B Testing", "Figma", "Jira", "Tableau"],
+    "soft_skills": ["User Empathy", "Stakeholder Management", "Cross-Functional Leadership", "Strategic Prioritization"],
+    "experience": [
+      {
+        "company": "GrowthPulse Media",
+        "role": "Growth Marketing Lead",
+        "period": "2021 - 2026",
+        "location": "New York, NY",
+        "bullets": [
+          "Partnered closely with engineering and UI/UX design teams to launch an interactive onboarding flow that boosted trial conversion by 24%.",
+          "Conducted 30+ qualitative customer discovery interviews to synthesize user friction points into actionable product feature requests.",
+          "Authored detailed user journey briefs and managed backlog prioritization in Jira.",
+          "Wrote complex SQL queries in PostgreSQL and Snowflake to measure retention cohort metrics."
+        ]
+      }
+    ],
+    "projects": [
+      {
+        "title": "ChurnPredict Dashboard",
+        "description": "Exploratory retention analysis tracking customer lifecycle triggers in Mixpanel and Tableau.",
+        "technologies": ["Mixpanel", "SQL", "Tableau"]
+      }
+    ],
+    "education": [
+      {
+        "institution": "Northwestern University",
+        "degree": "B.A.",
+        "field_of_study": "Communications & Economics",
+        "graduation_year": "2021"
+      }
+    ],
+    "certifications": [
+      {
+        "name": "Reforge Product Strategy Certificate",
+        "year": "2024"
+      }
+    ]
+  },
+  "job": {
+    "company": "Kite Software",
+    "role_title": "Associate Product Manager",
+    "raw_text": "Kite Software is seeking an Associate Product Manager. Key Requirements: 1. Demonstrated ability to partner with engineering and design to deliver customer-facing software features. 2. Strong analytical acumen with SQL and product analytics tools (Mixpanel, Amplitude, or similar). 3. Proven experience designing and interpreting hypothesis-driven A/B experiments. 4. Excellent written communication skills for creating clear user stories and feature specifications. 5. Empathy for end-users developed through direct customer interviews or qualitative research."
+  }
+}
